@@ -141,7 +141,7 @@ def load_no_3d_data():
 
 @st.cache_data(show_spinner=False)
 def load_disease_data():
-    url = "https://raw.githubusercontent.com/MeghanaVaddella/my-cv-dataset/refs/heads/main/disease%20data.txt"
+    url = "https://raw.githubusercontent.com/MeghanaVaddella/Neurodegenerative_database_codes/refs/heads/main/disease%20data.txt"
     try:
         response = requests.get(url)
         lines = response.text.splitlines()
