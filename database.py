@@ -122,7 +122,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # --- Header ---
-st.markdown("<div class='header-text'>NEUROGEN PPI</div>", unsafe_allow_html=True)
+st.markdown("<div class='header-text'>NEURODEGEN PPI</div>", unsafe_allow_html=True)
 
 # ---- LOAD DATA FUNCTIONS ----
 @st.cache_data(show_spinner=False)
@@ -299,7 +299,7 @@ with tabs[3]:  # 3D Visualizer tab
 
         if pdb_ids:
             molstar_url = "https://molstar.org/viewer/?url=" + ",".join([f"https://files.rcsb.org/download/{pdb}.pdb" for pdb in pdb_ids])
-            st.components.v1.iframe(molstar_url, width=1000, height=600)
+            st.components.v1.iframe(molstar_url, width=1000, height=400)
         else:
             st.warning("No valid PDB IDs found for visualization.")
 
@@ -411,7 +411,6 @@ with tabs[4]:
 
     github_links = {
         "PPI Data (CSV)": "https://github.com/MeghanaVaddella/my-cv-dataset/blob/main/my-cv-data.csv",
-        "Disease Text (TXT)": "https://github.com/MeghanaVaddella/my-cv-dataset/blob/main/disease%20data.txt",
         "3D Structure Data 1": "https://github.com/MeghanaVaddella/Neurodegenerative_Database/blob/main/3D%20Structure-1.csv",
         "3D Structure Data 2": "https://github.com/MeghanaVaddella/Neurodegenerative_Database/blob/main/3D%20Structure-2.csv",
         "No 3D Structure (CSV)": "https://github.com/MeghanaVaddella/Neurodegenerative_Database/blob/main/No%203D%20Structure.csv"
