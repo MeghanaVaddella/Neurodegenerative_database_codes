@@ -21,17 +21,17 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- Theme Colors (Updated) ---
-body_bg = "#B7C3D0"            # Mantee - Full Background and Navbar
-header_bg = "#3B5875"           # Police Blue - Header Background (keeping this same unless you want change)
-header_text_color = "#C4AEAD"   # Silver Pink - "NEUROGEN PPI" title
-general_text_color = "#1C2841"  # Yankees Blue - General Text
-button_bg = "#36454F"           # Charcoal - Download Button background
-button_text_color = "#DBE9F4"   # Azureish White - Button text
-table_bg = "#36454F"            # Charcoal - Table background
-table_border_color = "#5D8AA8"  # Rackley - Table border
-search_bg = "#A7C7E7"           # Pastel Blue - Search bar background
-remaining_bg = "#8BA8B7"        # Pewter Blue - Other areas
+# --- Theme Colors (Dark Mode Palette) ---
+body_bg = "#C4D8E2"            # Columbia Blue - Full Background and Navbar
+header_bg = "#3B5875"          # Police Blue - Header Background
+header_text_color = "#C4AEAD"  # Silver Pink - "NEUROGEN PPI" title
+general_text_color = "#001C3D" # Maastricht Blue - General Text
+button_bg = "#36454F"          # Charcoal - Download Button background
+button_text_color = "#DBE9F4"  # Azureish White - Button text
+table_bg = "#36454F"           # Charcoal - Table background
+table_border_color = "#5D8AA8" # Rackley - Table border
+search_bg = "#A7C7E7"          # Pastel Blue - Search bar background
+remaining_bg = "#8BA8B7"       # Pewter Blue - Other areas
 
 # --- Inject Custom Unified Styling ---
 st.markdown(f"""
@@ -70,7 +70,7 @@ st.markdown(f"""
         margin-right: 1.5rem;
     }}
     button[data-baseweb="tab"]:hover {{
-        color: #0F1A30 !important; /* Slightly darker Yankees Blue on hover */
+        color: #002B5B !important; /* Slightly darker Maastricht Blue on hover */
         background-color: {body_bg} !important;
         border: none !important;
     }}
@@ -120,10 +120,6 @@ st.markdown(f"""
     }}
     </style>
 """, unsafe_allow_html=True)
-
-# --- Header ---
-st.markdown("<div class='header-text'>NEUROGEN PPI</div>", unsafe_allow_html=True)
-
 
 # --- Header ---
 st.markdown("<div class='header-text'>NEUROGEN PPI</div>", unsafe_allow_html=True)
