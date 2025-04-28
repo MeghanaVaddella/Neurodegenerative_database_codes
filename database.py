@@ -16,7 +16,7 @@ st.markdown("""
     <style>
     @font-face {
         font-family: 'MADEVoyager';
-        src: url('https://github.com/MeghanaVaddella/Neurodegenerative_database_codes/blob/main/MADEVoyagerPERSONAL_USE-Bold.otf') format('opentype');
+        src: url('https://raw.githubusercontent.com/MeghanaVaddella/Neurodegenerative_database_codes/main/MADEVoyagerPERSONAL_USE-Bold.otf') format('opentype');
     }
     </style>
 """, unsafe_allow_html=True)
