@@ -236,10 +236,6 @@ with tabs[2]:
     st.dataframe(no_structure_df, use_container_width=True, hide_index=True)
     st.download_button("Download No 3D Structure CSV", no_structure_df.to_csv(index=False), "No_3D_Structure.csv", "text/csv")
 
-import streamlit as st
-import requests
-import py3Dmol
-
 # ---- 3D VISUALIZER TAB ----
 with tabs[3]:  # 3D Visualizer tab
     st.write("### 3D Protein Structure Visualizer")
@@ -388,34 +384,32 @@ with tabs[3]:  # 3D Visualizer tab
 
     st.markdown("---")
 
-# Upload PDB for Visualization
-st.markdown("---")
-st.subheader("📦 Upload Predicted PDB File from AlphaFold")
-pdb_file = st.file_uploader("Upload PDB file", type=["pdb"])
+     # ---- Upload PDB for Visualization ----
+    st.markdown("---")
+    st.subheader("📦 Upload Predicted PDB File from AlphaFold")
 
-if pdb_file:
-    pdb_bytes = pdb_file.read()
-    pdb_str = pdb_bytes.decode("utf-8", errors="replace")  # Handle encoding issues
+    pdb_file = st.file_uploader("Upload PDB file", type=["pdb"], key="upload_pdb")
 
-    st.success("✅ PDB uploaded. Rendering 3D structure...")
+    if pdb_file:
+        pdb_bytes = pdb_file.read()
+        pdb_str = pdb_bytes.decode("utf-8", errors="replace")  # Handle encoding issues
 
-    col1, col2 = st.columns([2, 1])
+        st.success("✅ PDB uploaded. Rendering 3D structure...")
 
-    with col1:
-        view = py3Dmol.view(width=700, height=500)
-        view.addModel(pdb_str, "pdb")
-        view.setStyle({'cartoon': {'color': 'spectrum'}})
-        view.zoomTo()
-        html = view._make_html()
-        st.components.v1.html(html, height=500)
+        col1, col2 = st.columns([2, 1])
 
-    with col2:
-        st.markdown("### 📄 PDB Content")
-        # Use text_area instead of st.text() to show long content with scroll
-        st.text_area("PDB File Content", pdb_str, height=500)
+        with col1:
+            view = py3Dmol.view(width=700, height=500)
+            view.addModel(pdb_str, "pdb")
+            view.setStyle({'cartoon': {'color': 'spectrum'}})
+            view.zoomTo()
+            html = view._make_html()
+            st.components.v1.html(html, height=500)
 
-        # Optionally add a download button
-        st.download_button("📥 Download PDB", pdb_bytes, file_name="structure.pdb", mime="chemical/x-pdb")
+        with col2:
+            st.markdown("### 📄 PDB Content")
+            st.text_area("PDB File Content", pdb_str, height=500)
+            st.download_button("📥 Download PDB", pdb_bytes, file_name="structure.pdb", mime="chemical/x-pdb")
 
 # ---- GITHUB EDIT TAB ----
 with tabs[4]:
