@@ -388,34 +388,34 @@ with tabs[3]:  # 3D Visualizer tab
 
     st.markdown("---")
 
-        # Upload PDB for Visualization
-    st.markdown("---")
-    st.subheader("📦 Upload Predicted PDB File from AlphaFold")
-    pdb_file = st.file_uploader("Upload PDB file", type=["pdb"])
+# Upload PDB for Visualization
+st.markdown("---")
+st.subheader("📦 Upload Predicted PDB File from AlphaFold")
+pdb_file = st.file_uploader("Upload PDB file", type=["pdb"])
 
-    # Optional: Display UniProt IDs for uploaded structure
-    col_info1, col_info2 = st.columns(2)
-    with col_info1:
-        uploaded_uid1 = st.text_input("Protein A UniProt ID (for display only)", key="uploaded_uid1").strip()
-    with col_info2:
-        uploaded_uid2 = st.text_input("Protein B UniProt ID (for display only)", key="uploaded_uid2").strip()
+if pdb_file:
+    pdb_bytes = pdb_file.read()
+    pdb_str = pdb_bytes.decode("utf-8", errors="replace")  # Handle encoding issues
 
-    if pdb_file:
-        pdb_str = pdb_file.read().decode("utf-8")
-        st.success("✅ PDB uploaded. Rendering 3D structure...")
+    st.success("✅ PDB uploaded. Rendering 3D structure...")
 
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
         view = py3Dmol.view(width=700, height=500)
         view.addModel(pdb_str, "pdb")
         view.setStyle({'cartoon': {'color': 'spectrum'}})
         view.zoomTo()
-
         html = view._make_html()
         st.components.v1.html(html, height=500)
 
-        with st.expander("📄 View PDB Content with Protein Info"):
-            st.markdown(f"**🧬 Protein A UniProt ID:** {uploaded_uid1 or 'Not provided'}")
-            st.markdown(f"**🧬 Protein B UniProt ID:** {uploaded_uid2 or 'Not provided'}")
-            st.text(pdb_str)
+    with col2:
+        st.markdown("### 📄 PDB Content")
+        # Use text_area instead of st.text() to show long content with scroll
+        st.text_area("PDB File Content", pdb_str, height=500)
+
+        # Optionally add a download button
+        st.download_button("📥 Download PDB", pdb_bytes, file_name="structure.pdb", mime="chemical/x-pdb")
 
 # ---- GITHUB EDIT TAB ----
 with tabs[4]:
