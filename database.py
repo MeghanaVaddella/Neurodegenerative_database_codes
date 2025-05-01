@@ -184,19 +184,62 @@ tabs = st.tabs([
 
 # ---- HOME TAB ----
 with tabs[0]:
-    st.header("🧠 Neurodegenerative Disease Overview")
-    keywords = [
-        "Alzheimer's Disease", 
-        "Parkinson's Disease", 
-        "Amyotrophic Lateral Sclerosis (ALS)", 
-        "Multiple Sclerosis (MS)", 
-        "Friedreich’s Ataxia (FA)"
-    ]
-    for paragraph in disease_text:
-        for keyword in keywords:
-            if keyword in paragraph:
-                paragraph = paragraph.replace(keyword, f"<span style='color:#d62728; font-weight:bold;'>{keyword}</span>")
-        st.markdown(paragraph, unsafe_allow_html=True)
+    # Styled introduction
+    st.markdown(
+        "<p style='color:#DC143C; font-size:18px;'>"
+        "NEURODEGEN PPI is the online database having information of the Protein-Protein Interactions involving in the Neurodegenerative Diseases."
+        "</p>",
+        unsafe_allow_html=True
+    )
+
+    # Styled heading for PPIs
+    st.markdown(
+        "<p style='color:#ECD540; font-weight:bold; font-size:20px;'>"
+        "What are Protein-Protein Interactions (PPIs) ?"
+        "</p>",
+        unsafe_allow_html=True
+    )
+
+    # Styled heading for applications
+    st.markdown(
+        "<p style='color:#66023C; font-weight:bold; font-size:23px;'>"
+        "Applications of the Protein-Protein Interactions"
+        "</p>",
+        unsafe_allow_html=True
+    )
+
+    # Styled list of applications
+    st.markdown(
+        "<ul style='color:#98817B; font-size:17px;'>"
+        "<li>Drug Discovery:</li>"
+        "<li>Diagnostics:</li>"
+        "<li>Synthetic Biology:</li>"
+        "<li>Functional Genomics:</li>"
+        "<li>Structural Biology:</li>"
+        "<li>Systems Biology and Target Validation</li>"
+        "</ul>",
+        unsafe_allow_html=True
+    )
+
+    # Styled section intro for disease information
+    st.markdown(
+        "<p style='color:#B22222; font-size:18px;'>"
+        "Here is some Information about the Diseases for which the PPIs are present in the database"
+        "</p>",
+        unsafe_allow_html=True
+    )
+
+    # Styled list of diseases
+    st.markdown(
+        "<ul style='color:#997A8D; font-size:17px;'>"
+        "<li>Alzheimer's Disease</li>"
+        "<li>Parkinson's Disease</li>"
+        "<li>Amyotrophic Lateral Sclerosis (ALS)</li>"
+        "<li>Multiple Sclerosis (MS)</li>"
+        "<li>Friedreich’s Ataxia (FA)</li>"
+        "</ul>",
+        unsafe_allow_html=True
+    )
 
 # ---- DATA TAB ----
 with tabs[1]:
