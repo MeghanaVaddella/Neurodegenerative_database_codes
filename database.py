@@ -184,60 +184,72 @@ tabs = st.tabs([
 
 # ---- HOME TAB ----
 with tabs[0]:
-    # Styled introduction
+    # Styled introduction - Asphalt (1)
     st.markdown(
-        "<p style='color:#DC143C; font-size:18px;'>"
+        "<p style='color:#130E0A; font-size:18px; font-weight:bold;'>"
         "NEURODEGEN PPI is the online database having information of the Protein-Protein Interactions involving in the Neurodegenerative Diseases."
         "</p>",
         unsafe_allow_html=True
     )
 
-    # Styled heading for PPIs
+    # Styled heading for PPIs - Dark Purple (2)
     st.markdown(
-        "<p style='color:#ECD540; font-weight:bold; font-size:20px;'>"
+        "<p style='color:#301934; font-size:20px; font-weight:bold;'>"
         "What are Protein-Protein Interactions (PPIs) ?"
         "</p>",
         unsafe_allow_html=True
     )
 
-    # Styled heading for applications
+    # Styled heading for applications - Maastricht Blue (3)
     st.markdown(
-        "<p style='color:#66023C; font-weight:bold; font-size:23px;'>"
+        "<p style='color:#001C3D; font-size:23px; font-weight:bold;'>"
         "Applications of the Protein-Protein Interactions"
         "</p>",
         unsafe_allow_html=True
     )
 
-    # Styled list of applications
+    # Application list - Indigo (4)
     st.markdown(
-        "<ul style='color:#98817B; font-size:17px;'>"
-        "<li>Drug Discovery:</li>"
-        "<li>Diagnostics:</li>"
-        "<li>Synthetic Biology:</li>"
-        "<li>Functional Genomics:</li>"
-        "<li>Structural Biology:</li>"
-        "<li>Systems Biology and Target Validation</li>"
-        "</ul>",
+        """
+        <ul style='color:#4B0082; font-size:18px;'>
+            <li><strong>1. Drug Discovery:</strong></li>
+            <li><strong>2. Diagnostics:</strong></li>
+            <li><strong>3. Synthetic Biology:</strong></li>
+            <li><strong>4. Functional Genomics:</strong></li>
+            <li><strong>5. Structural Biology:</strong></li>
+            <li><strong>6. Systems Biology and Target Validation</strong></li>
+        </ul>
+        """,
         unsafe_allow_html=True
     )
 
-    # Styled section intro for disease information
+    # Disease info heading - Charcoal Blue (5)
     st.markdown(
-        "<p style='color:#B22222; font-size:18px;'>"
+        "<p style='color:#264348; font-size:18px; font-weight:bold;'>"
         "Here is some Information about the Diseases for which the PPIs are present in the database"
         "</p>",
         unsafe_allow_html=True
     )
 
-    # Styled list of diseases
+    # Disease names list - American Purple (6)
     st.markdown(
-        "<ul style='color:#997A8D; font-size:17px;'>"
-        "<li>Alzheimer's Disease</li>"
-        "<li>Parkinson's Disease</li>"
-        "<li>Amyotrophic Lateral Sclerosis (ALS)</li>"
-        "<li>Multiple Sclerosis (MS)</li>"
-        "<li>Friedreich’s Ataxia (FA)</li>"
-        "</ul>",
+        """
+        <ul style='color:#66023C; font-size:18px;'>
+            <li><strong>Alzheimer's Disease</strong></li>
+            <li><strong>Parkinson's Disease</strong></li>
+            <li><strong>Amyotrophic Lateral Sclerosis (ALS)</strong></li>
+            <li><strong>Multiple Sclerosis (MS)</strong></li>
+            <li><strong>Friedreich’s Ataxia (FA)</strong></li>
+        </ul>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Remaining content - Cosmos Blue
+    st.markdown(
+        "<p style='color:#2E294E; font-size:16px;'>"
+        "Explore how Protein-Protein Interactions drive research, aid diagnosis, and reveal therapeutic targets in neurodegenerative diseases through the NEURODEGEN PPI platform."
+        "</p>",
         unsafe_allow_html=True
     )
 
