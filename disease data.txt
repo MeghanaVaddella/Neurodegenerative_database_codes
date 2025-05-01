@@ -1,4 +1,27 @@
-Neurodegenerative Disorders Data for Database
+
+
+NEURODEGEN PPI is the online database having information of the Protein-Protein Interactions involving in the Neurodegenerative Diseases.
+         PROTEIN-PROTEIN INTERACTIONS (PPI)
+      What are Protein-Protein Interactions (PPIs) ?
+          Protein-Protein Interactions (PPIs) refer to the physical contacts between two or more protein molecules. These interactions can be temporary (transient) or permanent (stable). They are fundamental for almost every biological process like forming protein complexes, signaling inside cells, immune responses, metabolism, and more. Proteins interact using specific binding sites through hydrogen bonds, ionic bonds, hydrophobic interactions, and van der Waals forces. PPIs are essential because they govern many biological processes including DNA replication, gene expression, metabolic pathways, immune responses, and programmed cell death (apoptosis). Disruption in these interactions can lead to diseases such as cancer, autoimmune disorders, and neurodegenerative conditions. Thus, understanding PPIs not only helps in understanding how life functions at the molecular level but also in identifying the causes of various diseases.
+
+   Applications of the Protein-Protein Interactions
+     1.Drug Discovery:
+Targeting PPIs enables the development of novel therapies, especially for diseases with previously undruggable targets such as cancer and viral infections. 
+     2.Diagnostics:
+Abnormal PPI patterns serve as early biomarkers for detecting diseases before symptoms arise, improving diagnosis and treatment planning.
+    3.Synthetic Biology:
+Engineered PPI networks are used to design programmable cells and synthetic pathways for use in medicine, agriculture, and bioengineering.
+    4.Functional Genomics:
+PPI data helps predict the function of unknown proteins by analyzing their interaction partners within biological networks.
+    5.Structural Biology:
+Studying PPIs reveals the architecture and dynamics of large protein complexes, offering insights into their mechanisms at the atomic level.
+    6.Systems Biology and Trget Validation:
+Mapping PPI networks allows researchers to model complex cellular systems and understand how proteins coordinate cellular processes and PPI analysis helps validate protein targets in drug development by confirming their role in disease-related pathways.
+    
+   The database is about Alzheimer's Disease, Parkinson's Disease, Amyotrophic Lateral Sclerosis (ALS), Multiple Sclerosis (MS), Friedreich’s Ataxia (FA). It consists of about 3034 Protein-Protein Interactions involving the listed diseases. 
+  
+Here is some Information about the Diseases for which the PPIs are present in the database
 
 Alzheimer's Disease  
 Alzheimer's Disease is a neurodegenerative disorder characterized by progressive memory loss, cognitive decline, and behavioral changes. It is caused by genetic mutations, aging, beta-amyloid plaques, and Tau protein tangles. Symptoms include confusion, difficulty in problem-solving, and mood swings. The disease primarily affects the hippocampus and spreads to other brain regions, involving neurotransmitters like acetylcholine and proteins such as beta-amyloid and Tau. Diagnosis involves cognitive assessments, MRI, PET scans, and cerebrospinal fluid tests. Treatment includes cholinesterase inhibitors, memantine, cognitive therapy, and lifestyle adjustments. Preventive strategies involve physical exercise, a brain-healthy diet, social engagement, and cognitive training, but the disease ultimately leads to progressive cognitive decline, loss of independence, and is eventually fatal.  
@@ -14,3 +37,16 @@ MS is an autoimmune neurodegenerative disorder where the immune system attacks t
 
 Friedreich’s Ataxia (FA)  
 Friedreich’s Ataxia is a rare inherited neurodegenerative disorder caused by mutations in the FXN gene, leading to reduced frataxin protein levels. It results in progressive damage to the nervous system, affecting movement and coordination. Symptoms include muscle weakness, ataxia, vision and hearing impairment, and scoliosis, as the disease primarily targets the spinal cord, peripheral nerves, and cerebellum. Diagnosis involves genetic testing, nerve conduction studies, and MRI. There is no cure, but treatments such as physical and speech therapy, along with supportive care, can help manage symptoms. While there is no known prevention, maintaining mobility and heart health may slow progression. FA leads to progressive disability, an increased risk of heart disease, and a shortened lifespan.
+
+What does the database Have?
+
+          The database presents the Protein-Protein Interactions Co-Expression, Experimentally Determined Interactions, Automated Textmining, Combined Score, Diseases Associated, BioGRID Interaction ID, Enterz Gene Interactor, BioGRID Interactor ID for Protein A and Protein B, Experimental System, Pubmed ID and the Author collected from STRING DATABASE, BIOGRID and IntACT.
+
+     The 3D-Visualization of the Protein-Protein Interactions is done using the Uniprot ID's, PDB ID's of both Protein A and Protein B and are viewed in MolStar Viewer. The structure of the Protein-Protein Interactions are visualized by using the Uniprot ID's in Pymol-3D Viewer.
+
+      The Protein Structure can be predicted using the AlphaFold-Multimer by generating the FASTA Sequences which help in generating the Protein Foldings of the Interaction using Google Colab having the AlphaFold2 in which the templates are generated using MMseq2. The Structures of the Protein Interactions can be be viewed in Chimera by downloading the PDB file from the 3D Visualizer: AlphaFold-based 3D Viewer (py3Dmol).
+
+     Additionally, the data present can be downloaded and new Data can be added using the GitHub links present in the Github Edit Tab.
+
+
+       NOW CARRYON AND DO THE INTERACTIONS
