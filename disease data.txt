@@ -16,7 +16,7 @@ Engineered PPI networks are used to design programmable cells and synthetic path
 PPI data helps predict the function of unknown proteins by analyzing their interaction partners within biological networks.
     5.Structural Biology:
 Studying PPIs reveals the architecture and dynamics of large protein complexes, offering insights into their mechanisms at the atomic level.
-    6.Systems Biology and Trget Validation:
+    6.Systems Biology and Target Validation:
 Mapping PPI networks allows researchers to model complex cellular systems and understand how proteins coordinate cellular processes and PPI analysis helps validate protein targets in drug development by confirming their role in disease-related pathways.
     
    The database is about Alzheimer's Disease, Parkinson's Disease, Amyotrophic Lateral Sclerosis (ALS), Multiple Sclerosis (MS), Friedreich’s Ataxia (FA). It consists of about 3034 Protein-Protein Interactions involving the listed diseases. 
