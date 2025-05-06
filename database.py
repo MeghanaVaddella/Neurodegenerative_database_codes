@@ -184,7 +184,6 @@ tabs = st.tabs([
 
 # ---- HOME TAB ----
 with tabs[0]:
-with tabs[0]:
     st.header("🧠 Neurodegenerative Disease Overview")
     keywords = [
         "Alzheimer's Disease", 
