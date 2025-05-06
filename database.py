@@ -184,74 +184,20 @@ tabs = st.tabs([
 
 # ---- HOME TAB ----
 with tabs[0]:
-    # Styled introduction - Asphalt (1)
-    st.markdown(
-        "<p style='color:#130E0A; font-size:18px; font-weight:bold;'>"
-        "NEURODEGEN PPI is the online database having information of the Protein-Protein Interactions involving in the Neurodegenerative Diseases."
-        "</p>",
-        unsafe_allow_html=True
-    )
-
-    # Styled heading for PPIs - Dark Purple (2)
-    st.markdown(
-        "<p style='color:#301934; font-size:20px; font-weight:bold;'>"
-        "What are Protein-Protein Interactions (PPIs) ?"
-        "</p>",
-        unsafe_allow_html=True
-    )
-
-    # Styled heading for applications - Maastricht Blue (3)
-    st.markdown(
-        "<p style='color:#001C3D; font-size:23px; font-weight:bold;'>"
-        "Applications of the Protein-Protein Interactions"
-        "</p>",
-        unsafe_allow_html=True
-    )
-
-    # Application list - Indigo (4)
-    st.markdown(
-        """
-        <ul style='color:#4B0082; font-size:18px;'>
-            <li><strong>1. Drug Discovery:</strong></li>
-            <li><strong>2. Diagnostics:</strong></li>
-            <li><strong>3. Synthetic Biology:</strong></li>
-            <li><strong>4. Functional Genomics:</strong></li>
-            <li><strong>5. Structural Biology:</strong></li>
-            <li><strong>6. Systems Biology and Target Validation</strong></li>
-        </ul>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # Disease info heading - Charcoal Blue (5)
-    st.markdown(
-        "<p style='color:#264348; font-size:18px; font-weight:bold;'>"
-        "Here is some Information about the Diseases for which the PPIs are present in the database"
-        "</p>",
-        unsafe_allow_html=True
-    )
-
-    # Disease names list - American Purple (6)
-    st.markdown(
-        """
-        <ul style='color:#66023C; font-size:18px;'>
-            <li><strong>Alzheimer's Disease</strong></li>
-            <li><strong>Parkinson's Disease</strong></li>
-            <li><strong>Amyotrophic Lateral Sclerosis (ALS)</strong></li>
-            <li><strong>Multiple Sclerosis (MS)</strong></li>
-            <li><strong>Friedreich’s Ataxia (FA)</strong></li>
-        </ul>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # Remaining content - Cosmos Blue
-    st.markdown(
-        "<p style='color:#2E294E; font-size:16px;'>"
-        "Explore how Protein-Protein Interactions drive research, aid diagnosis, and reveal therapeutic targets in neurodegenerative diseases through the NEURODEGEN PPI platform."
-        "</p>",
-        unsafe_allow_html=True
-    )
+with tabs[0]:
+    st.header("🧠 Neurodegenerative Disease Overview")
+    keywords = [
+        "Alzheimer's Disease", 
+        "Parkinson's Disease", 
+        "Amyotrophic Lateral Sclerosis (ALS)", 
+        "Multiple Sclerosis (MS)", 
+        "Friedreich’s Ataxia (FA)"
+    ]
+    for paragraph in disease_text:
+        for keyword in keywords:
+            if keyword in paragraph:
+                paragraph = paragraph.replace(keyword, f"<span style='color:#d62728; font-weight:bold;'>{keyword}</span>")
+        st.markdown(paragraph, unsafe_allow_html=True)
 
 # ---- DATA TAB ----
 with tabs[1]:
