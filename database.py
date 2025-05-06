@@ -183,8 +183,10 @@ tabs = st.tabs([
 ])
 
 # ---- HOME TAB ----
-with tabs[0]:
+if tabs[0] == "Home":
     st.header("🧠 Neurodegenerative Disease Overview")
+
+    # Keywords to highlight
     keywords = [
         "Alzheimer's Disease", 
         "Parkinson's Disease", 
@@ -192,11 +194,96 @@ with tabs[0]:
         "Multiple Sclerosis (MS)", 
         "Friedreich’s Ataxia (FA)"
     ]
+
+    # Process each paragraph in disease_text and highlight keywords with styling
     for paragraph in disease_text:
         for keyword in keywords:
             if keyword in paragraph:
                 paragraph = paragraph.replace(keyword, f"<span style='color:#d62728; font-weight:bold;'>{keyword}</span>")
         st.markdown(paragraph, unsafe_allow_html=True)
+
+    # Process remaining paragraphs and highlight specific phrases with custom styling
+    for paragraph in disease_text:
+        paragraph = paragraph.replace(
+            "PROTEIN-PROTEIN INTERACTIONS (PPI)",
+            "<span style='font-weight:bold; color:#800020;'>PROTEIN-PROTEIN INTERACTIONS (PPI)</span>"
+        )
+        paragraph = paragraph.replace(
+            "What are Protein-Protein Interactions (PPIs) ?",
+            "<span style='font-weight:bold; color:#8B0000;'>What are Protein-Protein Interactions (PPIs) ?</span>"
+        )
+        paragraph = paragraph.replace(
+            "Applications of the Protein-Protein Interactions",
+            "<span style='font-weight:bold; color:#800020;'>Applications of the Protein-Protein Interactions</span>"
+        )
+        paragraph = paragraph.replace(
+            "1.Drug Discovery:",
+            "<span style='font-weight:bold; color:#8B4513;'>1.Drug Discovery:</span>"
+        )
+        paragraph = paragraph.replace(
+            "2.Diagnostics:",
+            "<span style='font-weight:bold; color:#8B4513;'>2.Diagnostics:</span>"
+        )
+        paragraph = paragraph.replace(
+            "3.Synthetic Biology:",
+            "<span style='font-weight:bold; color:#8B4513;'>3.Synthetic Biology:</span>"
+        )
+        paragraph = paragraph.replace(
+            "4.Functional Genomics:",
+            "<span style='font-weight:bold; color:#8B4513;'>4.Functional Genomics:</span>"
+        )
+        paragraph = paragraph.replace(
+            "5.Structural Biology:",
+            "<span style='font-weight:bold; color:#8B4513;'>5.Structural Biology:</span>"
+        )
+        paragraph = paragraph.replace(
+            "6.Systems Biology and Target Validation:",
+            "<span style='font-weight:bold; color:#8B4513;'>6.Systems Biology and Target Validation:</span>"
+        )
+        paragraph = paragraph.replace(
+            "Alzheimer's Disease",
+            "<span style='font-weight:bold; color:red;'>Alzheimer's Disease</span>"
+        )
+        paragraph = paragraph.replace(
+            "Parkinson's Disease",
+            "<span style='font-weight:bold; color:red;'>Parkinson's Disease</span>"
+        )
+        paragraph = paragraph.replace(
+            "Amyotrophic Lateral Sclerosis (ALS)",
+            "<span style='font-weight:bold; color:red;'>Amyotrophic Lateral Sclerosis (ALS)</span>"
+        )
+        paragraph = paragraph.replace(
+            "Multiple Sclerosis (MS)",
+            "<span style='font-weight:bold; color:red;'>Multiple Sclerosis (MS)</span>"
+        )
+        paragraph = paragraph.replace(
+            "Friedreich’s Ataxia (FA)",
+            "<span style='font-weight:bold; color:red;'>Friedreich’s Ataxia (FA)</span>"
+        )
+        paragraph = paragraph.replace(
+            "What does the database Have?",
+            "<span style='font-weight:bold; color:#800020;'>What does the database Have?</span>"
+        )
+        paragraph = paragraph.replace(
+            "The database presents the Protein-Protein Interactions Co-Expression, Experimentally Determined Interactions, Automated Textmining, Combined Score, Diseases Associated, BioGRID Interaction ID, Enterz Gene Interactor, BioGRID Interactor ID for Protein A and Protein B, Experimental System, Pubmed ID and the Author collected from STRING DATABASE, BIOGRID and IntACT.",
+            "<span style='color:darkviolet;'>• The database presents the Protein-Protein Interactions Co-Expression, Experimentally Determined Interactions, Automated Textmining, Combined Score, Diseases Associated, BioGRID Interaction ID, Enterz Gene Interactor, BioGRID Interactor ID for Protein A and Protein B, Experimental System, Pubmed ID and the Author collected from STRING DATABASE, BIOGRID and IntACT.</span>"
+        )
+        paragraph = paragraph.replace(
+            "The 3D-Visualization of the Protein-Protein Interactions is done using the Uniprot ID's, PDB ID's of both Protein A and Protein B and are viewed in MolStar Viewer. The structure of the Protein-Protein Interactions are visualized by using the Uniprot ID's in Pymol-3D Viewer.",
+            "<span style='color:darkviolet;'>• The 3D-Visualization of the Protein-Protein Interactions is done using the Uniprot ID's, PDB ID's of both Protein A and Protein B and are viewed in MolStar Viewer. The structure of the Protein-Protein Interactions are visualized by using the Uniprot ID's in Pymol-3D Viewer.</span>"
+        )
+        paragraph = paragraph.replace(
+            "The Protein Structure can be predicted using the AlphaFold-Multimer by generating the FASTA Sequences which help in generating the Protein Foldings of the Interaction using Google Colab having the AlphaFold2 in which the templates are generated using MMseq2. The Structures of the Protein Interactions can be viewed in Chimera by downloading the PDB file from the 3D Visualizer: AlphaFold-based 3D Viewer (py3Dmol).",
+            "<span style='color:darkviolet;'>• The Protein Structure can be predicted using the AlphaFold-Multimer by generating the FASTA Sequences which help in generating the Protein Foldings of the Interaction using Google Colab having the AlphaFold2 in which the templates are generated using MMseq2. The Structures of the Protein Interactions can be viewed in Chimera by downloading the PDB file from the 3D Visualizer: AlphaFold-based 3D Viewer (py3Dmol).</span>"
+        )
+        paragraph = paragraph.replace(
+            "Additionally, the data present can be downloaded and new Data can be added using the GitHub links present in the Github Edit Tab.",
+            "<span style='color:darkviolet;'>• Additionally, the data present can be downloaded and new Data can be added using the GitHub links present in the Github Edit Tab.</span>"
+        )
+
+        # Display the formatted paragraph
+        st.markdown(paragraph, unsafe_allow_html=True)
+
 
 # ---- DATA TAB ----
 with tabs[1]:
