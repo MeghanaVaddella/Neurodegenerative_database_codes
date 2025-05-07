@@ -417,7 +417,7 @@ with tabs[3]:  # 3D Visualizer tab
 
     if pdb_file:
         pdb_bytes = pdb_file.read()
-        pdb_str = pdb_bytes.decode("utf-8", errors="replace")  # Handle encoding issues
+        pdb_str = pdb_bytes.decode("utf-8", errors="replace")  # Convert bytes to string
 
         st.success("✅ PDB uploaded successfully!")
 
@@ -426,9 +426,15 @@ with tabs[3]:  # 3D Visualizer tab
         with col1:
             st.markdown("### 📄 PDB File Preview")
             st.text_area("PDB File Content", pdb_str, height=500)
+            st.download_button(
+                label="📥 Download PDB",
+                data=pdb_str,
+                file_name="uploaded_structure.pdb",
+                mime="chemical/x-pdb"
+            )
 
         with col2:
-            st.download_button("📥 Download PDB", pdb_str, file_name="uploaded_structure.pdb", mime="chemical/x-pdb")
+            pass  # No additional UI here
 
 # ---- GITHUB EDIT TAB ----
 with tabs[4]:
