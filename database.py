@@ -410,25 +410,25 @@ with tabs[3]:  # 3D Visualizer tab
     st.markdown("---")
 
    # ---- Upload PDB for Visualization ----
-st.markdown("---")
-st.subheader("📦 Upload Predicted PDB File from AlphaFold")
+    st.markdown("---")
+    st.subheader("📦 Upload Predicted PDB File from AlphaFold")
 
-pdb_file = st.file_uploader("Upload PDB file", type=["pdb"], key="upload_pdb")
+    pdb_file = st.file_uploader("Upload PDB file", type=["pdb"], key="upload_pdb")
 
-if pdb_file:
-    pdb_bytes = pdb_file.read()
-    pdb_str = pdb_bytes.decode("utf-8", errors="replace")  # Handle encoding issues
+    if pdb_file:
+        pdb_bytes = pdb_file.read()
+        pdb_str = pdb_bytes.decode("utf-8", errors="replace")  # Handle encoding issues
 
-    st.success("✅ PDB uploaded successfully!")
+        st.success("✅ PDB uploaded successfully!")
 
-    col1, col2 = st.columns([2, 1])
+        col1, col2 = st.columns([2, 1])
 
-    with col1:
-        st.markdown("### 📄 PDB File Preview")
-        st.text_area("PDB File Content", pdb_str, height=500)
+        with col1:
+            st.markdown("### 📄 PDB File Preview")
+            st.text_area("PDB File Content", pdb_str, height=500)
 
-    with col2:
-        st.download_button("📥 Download PDB", pdb_str, file_name="uploaded_structure.pdb", mime="chemical/x-pdb")
+        with col2:
+            st.download_button("📥 Download PDB", pdb_str, file_name="uploaded_structure.pdb", mime="chemical/x-pdb")
 
 # ---- GITHUB EDIT TAB ----
 with tabs[4]:
