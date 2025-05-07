@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import requests
@@ -198,7 +197,7 @@ with tabs[0]:
         # Highlight keywords
         for keyword in keywords:
             if keyword in paragraph:
-                paragraph = paragraph.replace(keyword, f"<span style='color:#d62728; font-weight:bold; font-size:30px;'>{keyword}</span>")
+                paragraph = paragraph.replace(keyword, f"<span style='color:#d62728; font-weight:bold; font-size:25px;'>{keyword}</span>")
 
         # Additional styling replacements
         replacements = {
@@ -414,7 +413,7 @@ with tabs[3]:  # 3D Visualizer tab
 
     st.markdown("---")
 
-     # ---- Upload PDB for Visualization ----
+    # ---- Upload PDB for Visualization ----
     st.markdown("---")
     st.subheader("📦 Upload Predicted PDB File from AlphaFold")
 
@@ -428,18 +427,22 @@ with tabs[3]:  # 3D Visualizer tab
 
         col1, col2 = st.columns([2, 1])
 
-        with col1:
-            view = py3Dmol.view(width=700, height=500)
-            view.addModel(pdb_str, "pdb")
-            view.setStyle({'cartoon': {'color': 'spectrum'}})
-            view.zoomTo()
-            html = view._make_html()
-            st.components.v1.html(html, height=500)
+with col1:
+    st.markdown("### 📤 Upload a PDB File")
+    uploaded_file = st.file_uploader("Choose a PDB file", type=["pdb"])
+    
+    if uploaded_file is not None:
+        pdb_str = uploaded_file.read().decode("utf-8")
+        st.markdown("### 📄 PDB File Preview")
+        st.text_area("PDB File Content", pdb_str, height=500)
+        st.download_button("📥 Download PDB", pdb_str, file_name="uploaded_structure.pdb", mime="chemical/x-pdb")
 
-        with col2:
-            st.markdown("### 📄 PDB Content")
-            st.text_area("PDB File Content", pdb_str, height=500)
-            st.download_button("📥 Download PDB", pdb_bytes, file_name="structure.pdb", mime="chemical/x-pdb")
+with col2:
+    st.markdown("### ℹ️ Instructions")
+    st.markdown("""
+        - Upload a `.pdb` file to view its content.
+        - You can copy or download the file after uploading.
+    """)
 
 # ---- GITHUB EDIT TAB ----
 with tabs[4]:
