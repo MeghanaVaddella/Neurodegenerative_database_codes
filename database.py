@@ -185,7 +185,8 @@ tabs = st.tabs([
 
 # ---- HOME TAB ----
 with tabs[0]:
-   
+    st.header("🧠 Neurodegenerative Disease Overview")
+
     keywords = [
         "Alzheimer's Disease", 
         "Parkinson's Disease", 
@@ -218,11 +219,15 @@ with tabs[0]:
             "Additionally, the data present can be downloaded and new Data can be added using the GitHub links present in the Github Edit Tab.": "<span style='color:darkviolet; font-size:40px;'>• Additionally, the data present can be downloaded and new Data can be added using the GitHub links present in the Github Edit Tab.</span>"
         }
 
+        # Replace specific phrases with the corresponding styled text
         for old, new in replacements.items():
             paragraph = paragraph.replace(old, new)
 
-        st.markdown(paragraph, unsafe_allow_html=True)
+        # Apply default styling for the remaining content (font-size: 35px)
+        paragraph = f"<span style='font-size:35px;'>{paragraph}</span>"
 
+        # Display the paragraph with inline HTML and styling
+        st.markdown(paragraph, unsafe_allow_html=True)
 
 # ---- DATA TAB ----
 with tabs[1]:
