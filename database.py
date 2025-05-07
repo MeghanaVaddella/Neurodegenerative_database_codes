@@ -185,7 +185,6 @@ tabs = st.tabs([
 
 # ---- HOME TAB ----
 with tabs[0]:
-    st.header("🧠 Neurodegenerative Disease Overview")
 
     keywords = [
         "Alzheimer's Disease", 
@@ -199,24 +198,24 @@ with tabs[0]:
         # Highlight keywords
         for keyword in keywords:
             if keyword in paragraph:
-                paragraph = paragraph.replace(keyword, f"<span style='color:#d62728; font-weight:bold; font-size:40px;'>{keyword}</span>")
+                paragraph = paragraph.replace(keyword, f"<span style='color:#d62728; font-weight:bold; font-size:30px;'>{keyword}</span>")
 
         # Additional styling replacements
         replacements = {
-            "PROTEIN-PROTEIN INTERACTIONS (PPI)": "<span style='font-weight:bold; color:#800020; font-size:40px;'>PROTEIN-PROTEIN INTERACTIONS (PPI)</span>",
-            "What are Protein-Protein Interactions (PPIs) ?": "<span style='font-weight:bold; color:#8B0000; font-size:40px;'>What are Protein-Protein Interactions (PPIs) ?</span>",
-            "Applications of the Protein-Protein Interactions": "<span style='font-weight:bold; color:#800020; font-size:40px;'>Applications of the Protein-Protein Interactions</span>",
-            "1.Drug Discovery:": "<span style='font-weight:bold; color:#8B4513; font-size:40px;'>1.Drug Discovery:</span>",
-            "2.Diagnostics:": "<span style='font-weight:bold; color:#8B4513; font-size:40px;'>2.Diagnostics:</span>",
-            "3.Synthetic Biology:": "<span style='font-weight:bold; color:#8B4513; font-size:40px;'>3.Synthetic Biology:</span>",
-            "4.Functional Genomics:": "<span style='font-weight:bold; color:#8B4513; font-size:40px;'>4.Functional Genomics:</span>",
-            "5.Structural Biology:": "<span style='font-weight:bold; color:#8B4513; font-size:40px;'>5.Structural Biology:</span>",
-            "6.Systems Biology and Target Validation:": "<span style='font-weight:bold; color:#8B4513; font-size:40px;'>6.Systems Biology and Target Validation:</span>",
-            "What does the database Have?": "<span style='font-weight:bold; color:#800020; font-size:40px;'>What does the database Have?</span>",
-            "The database presents the Protein-Protein Interactions Co-Expression, Experimentally Determined Interactions, Automated Textmining, Combined Score, Diseases Associated, BioGRID Interaction ID, Enterz Gene Interactor, BioGRID Interactor ID for Protein A and Protein B, Experimental System, Pubmed ID and the Author collected from STRING DATABASE, BIOGRID and IntACT.": "<span style='color:darkviolet; font-size:40px;'>• The database presents the Protein-Protein Interactions Co-Expression, Experimentally Determined Interactions, Automated Textmining, Combined Score, Diseases Associated, BioGRID Interaction ID, Enterz Gene Interactor, BioGRID Interactor ID for Protein A and Protein B, Experimental System, Pubmed ID and the Author collected from STRING DATABASE, BIOGRID and IntACT.</span>",
+            "PROTEIN-PROTEIN INTERACTIONS (PPI)": "<span style='font-weight:bold; color:#800020; font-size:30px;'>PROTEIN-PROTEIN INTERACTIONS (PPI)</span>",
+            "What are Protein-Protein Interactions (PPIs) ?": "<span style='font-weight:bold; color:#8B0000; font-size:30px;'>What are Protein-Protein Interactions (PPIs) ?</span>",
+            "Applications of the Protein-Protein Interactions": "<span style='font-weight:bold; color:#800020; font-size:30px;'>Applications of the Protein-Protein Interactions</span>",
+            "1.Drug Discovery:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>1.Drug Discovery:</span>",
+            "2.Diagnostics:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>2.Diagnostics:</span>",
+            "3.Synthetic Biology:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>3.Synthetic Biology:</span>",
+            "4.Functional Genomics:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>4.Functional Genomics:</span>",
+            "5.Structural Biology:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>5.Structural Biology:</span>",
+            "6.Systems Biology and Target Validation:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>6.Systems Biology and Target Validation:</span>",
+            "What does the database Have?": "<span style='font-weight:bold; color:#800020; font-size:30px;'>What does the database Have?</span>",
+            "The database presents the Protein-Protein Interactions Co-Expression, Experimentally Determined Interactions, Automated Textmining, Combined Score, Diseases Associated, BioGRID Interaction ID, Enterz Gene Interactor, BioGRID Interactor ID for Protein A and Protein B, Experimental System, Pubmed ID and the Author collected from STRING DATABASE, BIOGRID and IntACT.": "<span style='color:darkviolet; font-size:25px;'>• The database presents the Protein-Protein Interactions Co-Expression, Experimentally Determined Interactions, Automated Textmining, Combined Score, Diseases Associated, BioGRID Interaction ID, Enterz Gene Interactor, BioGRID Interactor ID for Protein A and Protein B, Experimental System, Pubmed ID and the Author collected from STRING DATABASE, BIOGRID and IntACT.</span>",
             "The 3D-Visualization of the Protein-Protein Interactions is done using the Uniprot ID's, PDB ID's of both Protein A and Protein B and are viewed in MolStar Viewer. The structure of the Protein-Protein Interactions are visualized by using the Uniprot ID's in Pymol-3D Viewer.": "<span style='color:darkviolet; font-size:40px;'>• The 3D-Visualization of the Protein-Protein Interactions is done using the Uniprot ID's, PDB ID's of both Protein A and Protein B and are viewed in MolStar Viewer. The structure of the Protein-Protein Interactions are visualized by using the Uniprot ID's in Pymol-3D Viewer.</span>",
             "The Protein Structure can be predicted using the AlphaFold-Multimer by generating the FASTA Sequences which help in generating the Protein Foldings of the Interaction using Google Colab having the AlphaFold2 in which the templates are generated using MMseq2. The Structures of the Protein Interactions can be viewed in Chimera by downloading the PDB file from the 3D Visualizer: AlphaFold-based 3D Viewer (py3Dmol).": "<span style='color:darkviolet; font-size:40px;'>• The Protein Structure can be predicted using the AlphaFold-Multimer by generating the FASTA Sequences which help in generating the Protein Foldings of the Interaction using Google Colab having the AlphaFold2 in which the templates are generated using MMseq2. The Structures of the Protein Interactions can be viewed in Chimera by downloading the PDB file from the 3D Visualizer: AlphaFold-based 3D Viewer (py3Dmol).</span>",
-            "Additionally, the data present can be downloaded and new Data can be added using the GitHub links present in the Github Edit Tab.": "<span style='color:darkviolet; font-size:40px;'>• Additionally, the data present can be downloaded and new Data can be added using the GitHub links present in the Github Edit Tab.</span>"
+            "Additionally, the data present can be downloaded and new Data can be added using the GitHub links present in the Github Edit Tab.": "<span style='color:darkviolet; font-size:25px;'>• Additionally, the data present can be downloaded and new Data can be added using the GitHub links present in the Github Edit Tab.</span>"
         }
 
         # Replace specific phrases with the corresponding styled text
@@ -224,7 +223,7 @@ with tabs[0]:
             paragraph = paragraph.replace(old, new)
 
         # Apply default styling for the remaining content (font-size: 35px)
-        paragraph = f"<span style='font-size:35px;'>{paragraph}</span>"
+        paragraph = f"<span style='font-size:20px;'>{paragraph}</span>"
 
         # Display the paragraph with inline HTML and styling
         st.markdown(paragraph, unsafe_allow_html=True)
