@@ -122,7 +122,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # --- Header ---
-st.markdown("<div class='header-text'>NEURODEGEN PPI</div>", unsafe_allow_html=True)
+st.markdown("<div class='header-text'>NEUROGEN PPI</div>", unsafe_allow_html=True)
 
 # ---- LOAD DATA FUNCTIONS ----
 @st.cache_data(show_spinner=False)
