@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import plotly.express as px
 import seaborn as sns
-from ipywidgets import interact, Dropdown
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="NEUROGEN PPI", layout="wide")
