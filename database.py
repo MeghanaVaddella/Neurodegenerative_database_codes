@@ -179,6 +179,7 @@ tabs = st.tabs([
     "Data", 
     "3D Structure Data", 
     "3D Visualizer", 
+    "Data Visualization",  # NEW TAB ADDED HERE
     "GitHub Edit"
 ])
 
@@ -436,8 +437,74 @@ with tabs[3]:  # 3D Visualizer tab
         with col2:
             pass  # No additional UI here
 
+# ---- NEW DATA VISUALIZATION TAB ----
+with tabs[4]:  # Index 4 for the 5th tab
+    st.header("📊 Data Visualization")
+    
+    # --- Top Proteins by Interaction Count & Combined Score ---
+    st.subheader("Top Proteins by Interaction Count & Combined Score")
+    
+    # Calculate interaction counts and average scores
+    protein_stats = (
+        pd.concat([ppi_df['Protein A'], ppi_df['Protein B']])
+        .value_counts()
+        .reset_index(name='Interaction Count')
+        .merge(
+            ppi_df.groupby('Protein A')['Combined Score'].mean().reset_index(),
+            left_on='index', right_on='Protein A', how='left'
+        )
+        .rename(columns={'Combined Score': 'Avg Combined Score'})
+        .head(20)
+    )
+    
+    # Create bar chart
+    if not protein_stats.empty:
+        fig_bar = px.bar(
+            protein_stats,
+            x='Interaction Count',
+            y='index',
+            orientation='h',
+            color='Avg Combined Score',
+            color_continuous_scale='Viridis',
+            title="Top 20 Proteins: Interaction Count vs. Combined Score"
+        )
+        st.plotly_chart(fig_bar, use_container_width=True)
+    
+    # --- Experimental System Distribution ---
+    st.subheader("Experimental System Distribution")
+    if 'Experimental System' in ppi_df.columns:
+        exp_systems = ppi_df['Experimental System'].value_counts().reset_index()
+        fig_exp = px.bar(
+            exp_systems,
+            x='count',
+            y='Experimental System',
+            orientation='h',
+            title="Types of Experimental Evidence"
+        )
+        st.plotly_chart(fig_exp, use_container_width=True)
+    
+    # --- Combined Score Analysis ---
+    st.subheader("Combined Score Analysis")
+    fig_score = px.histogram(
+        ppi_df,
+        x='Combined Score',
+        nbins=50,
+        title="Distribution of Combined Confidence Scores"
+    )
+    st.plotly_chart(fig_score, use_container_width=True)
+    
+    # --- Dataset Information ---
+    st.subheader("Dataset Information")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Total Interactions", len(ppi_df))
+    with col2:
+        st.metric("Unique Proteins", len(pd.concat([ppi_df['Protein A'], ppi_df['Protein B']]).unique()))
+    with col3:
+        st.metric("Diseases Covered", len(ppi_df['Disease Associated'].unique())
+                  
 # ---- GITHUB EDIT TAB ----
-with tabs[4]:
+with tabs[5]:
     st.header("🛠️ GitHub Edit Zone")
 
     st.markdown("""
