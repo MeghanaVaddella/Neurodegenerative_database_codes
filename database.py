@@ -501,7 +501,7 @@ with tabs[4]:  # Index 4 for the 5th tab
     with col2:
         st.metric("Unique Proteins", len(pd.concat([ppi_df['Protein A'], ppi_df['Protein B']]).unique()))
     with col3:
-        st.metric("Diseases Covered", len(ppi_df['Disease Associated'].unique())
+        st.metric("Diseases Covered", len(ppi_df['Disease Associated'].unique()))
                   
 # ---- GITHUB EDIT TAB ----
 with tabs[5]:
