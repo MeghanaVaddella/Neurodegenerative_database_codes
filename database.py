@@ -179,12 +179,12 @@ tabs = st.tabs([
     "Data", 
     "3D Structure Data", 
     "3D Visualizer", 
+    "Data Visualizer",
     "GitHub Edit"
 ])
 
 # ---- HOME TAB ----
 with tabs[0]:
-
     keywords = [
         "Alzheimer's Disease", 
         "Parkinson's Disease", 
@@ -262,7 +262,7 @@ with tabs[2]:
     st.download_button("Download No 3D Structure CSV", no_structure_df.to_csv(index=False), "No_3D_Structure.csv", "text/csv")
 
 # ---- 3D VISUALIZER TAB ----
-with tabs[3]:  # 3D Visualizer tab
+with tabs[3]:
     st.write("### 3D Protein Structure Visualizer")
 
     # MolStar Viewer using PDB IDs from dataset
@@ -357,7 +357,9 @@ with tabs[3]:  # 3D Visualizer tab
             viewer.setStyle({'model': 1}, {'cartoon': {'color': 'skyblue'}})
             viewer.setBackgroundColor("white")
             viewer.zoomTo()
-            st.components.v1.html(viewer._make_html(), height=600)
+            
+            # Render the py3Dmol viewer
+            st.components.v1.html(viewer.show(), height=600)
 
             # Download combined PDB
             combined_pdb = f"REMARK   Protein A: {selected_uniprot_a}\n{pdb_a}\nREMARK   Protein B: {selected_uniprot_b}\n{pdb_b}"
@@ -384,10 +386,14 @@ with tabs[3]:  # 3D Visualizer tab
 
     fasta_col1, fasta_col2 = st.columns(2)
     with fasta_col1:
-        fasta_uid1 = st.selectbox("🔍 Select UniProt ID for Protein A (FASTA)", options=[""] + uniprot_a_options, key="select_fasta_a")
+        fasta_uid1 = st.selectbox("🔍 Select UniProt ID for Protein A (FASTA)", 
+                                options=[""] + uniprot_a_options, 
+                                key="select_fasta_a")
 
     with fasta_col2:
-        fasta_uid2 = st.selectbox("🔍 Select UniProt ID for Protein B (FASTA)", options=[""] + uniprot_b_options, key="select_fasta_b")
+        fasta_uid2 = st.selectbox("🔍 Select UniProt ID for Protein B (FASTA)", 
+                                options=[""] + uniprot_b_options, 
+                                key="select_fasta_b")
 
     if st.button("Generate AlphaFold-Multimer Input (FASTA)"):
         if fasta_uid1 and fasta_uid2:
@@ -396,12 +402,16 @@ with tabs[3]:  # 3D Visualizer tab
 
             if seq1 and seq2:
                 combined_fasta = f"{seq1.strip()}\n{seq2.strip()}"
-                st.success("FASTA file generated successfully.")
-                st.download_button("⬇️ Download FASTA", data=combined_fasta, file_name="multimer_input.fasta", mime="text/plain")
+                st.success("FASTA file generated successfully!")
+                st.download_button("⬇️ Download FASTA", 
+                                  data=combined_fasta, 
+                                  file_name="multimer_input.fasta", 
+                                  mime="text/plain")
                 st.code(combined_fasta)
 
                 colab_link = "https://colab.research.google.com/github/sokrypton/ColabFold/blob/main/AlphaFold2.ipynb"
-                st.markdown(f"🔗 **[Open AlphaFold-Multimer in Google Colab]({colab_link})**", unsafe_allow_html=True)
+                st.markdown(f"🔗 **[Open AlphaFold-Multimer in Google Colab]({colab_link})**", 
+                          unsafe_allow_html=True)
             else:
                 st.error("❌ Error fetching sequences. Check UniProt IDs.")
         else:
@@ -409,18 +419,15 @@ with tabs[3]:  # 3D Visualizer tab
 
     st.markdown("---")
 
-   # ---- Upload PDB for Visualization ----
-    st.markdown("---")
+    # ---- Upload PDB for Visualization ----
     st.subheader("📦 Upload Predicted PDB File from AlphaFold")
-
     pdb_file = st.file_uploader("Upload PDB file", type=["pdb"], key="upload_pdb")
 
     if pdb_file:
         pdb_bytes = pdb_file.read()
-        pdb_str = pdb_bytes.decode("utf-8", errors="replace")  # Convert bytes to string
+        pdb_str = pdb_bytes.decode("utf-8", errors="replace")
 
         st.success("✅ PDB uploaded successfully!")
-
         col1, col2 = st.columns([2, 1])
 
         with col1:
@@ -434,15 +441,220 @@ with tabs[3]:  # 3D Visualizer tab
             )
 
         with col2:
-            pass  # No additional UI here
+            # Display the uploaded structure in py3Dmol
+            st.markdown("### 🧬 Uploaded Structure Viewer")
+            viewer = py3Dmol.view(width=400, height=300)
+            viewer.addModel(pdb_str, "pdb")
+            viewer.setStyle({'cartoon': {'color': 'spectrum'}})
+            viewer.setBackgroundColor("white")
+            viewer.zoomTo()
+            st.components.v1.html(viewer.show(), height=350)
 
-# ---- GITHUB EDIT TAB ----
+# ---- DATA TAB ----
 with tabs[4]:
-    st.header("🛠️ GitHub Edit Zone")
+    st.header("Data Visualizer")
+    st.dataframe(ppi_df, use_container_width=True, hide_index=True)
+    st.download_button("Download PPI CSV", ppi_df.to_csv(index=False), "PPI_data.csv", "text/csv")
 
+    # -------------------------------------
+    # 1. Top Proteins Bar Chart (with Combined Score)
+    # -------------------------------------
+    st.subheader("Top Proteins by Interaction Count & Combined Score")
+    
+    # Calculate interaction counts and average combined score
+    protein_stats = (
+        pd.concat([ppi_df['Protein A'], ppi_df['Protein B']])
+        .value_counts()
+        .reset_index(name='Interaction Count')
+        .merge(
+            ppi_df.groupby('Protein A')['Combined Score'].mean().reset_index(),
+            left_on='index', right_on='Protein A', how='left'
+        )
+        .rename(columns={'Combined Score': 'Avg Combined Score'})
+        .head(20)
+    )
+
+    # Create bar chart with Plotly
+    fig_bar = px.bar(
+        protein_stats,
+        x='Interaction Count',
+        y='index',
+        orientation='h',
+        color='Avg Combined Score',
+        color_continuous_scale='Viridis',
+        title="Top 20 Proteins: Interaction Count vs. Combined Score"
+    )
+    st.plotly_chart(fig_bar, use_container_width=True)
+
+    # -------------------------------------
+    # 2. Interactive Network (with Experimental Systems)
+    # -------------------------------------
+    st.subheader("Interactive PPI Network with Experimental Evidence")
+
+    # Create NetworkX graph with edge attributes
+    G = nx.from_pandas_edgelist(
+        ppi_df,
+        source='Protein A',
+        target='Protein B',
+        edge_attr=['Experimental System', 'Combined Score', 'Pubmed ID', 'Author']
+    )
+
+    # Configure PyVis network
+    net = Network(
+        height="800px",
+        width="100%",
+        notebook=False,
+        bgcolor="white",
+        font_color="black",
+        select_menu=True,
+        filter_menu=True
+    )
+
+    # Add nodes and edges with metadata
+    for node in G.nodes():
+        net.add_node(node, title=node)
+
+    for edge in G.edges(data=True):
+        net.add_edge(
+            edge[0], edge[1],
+            title=f"""
+            Experimental System: {edge[2]['Experimental System']}<br>
+            PubMed ID: {edge[2]['Pubmed ID']}<br>
+            Author: {edge[2]['Author']}<br>
+            Combined Score: {edge[2]['Combined Score']}
+            """,
+            value=edge[2]['Combined Score']  # For edge thickness
+        )
+
+    # Save and display network
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as tmpfile:
+        net.save_graph(tmpfile.name)
+        st.components.v1.html(open(tmpfile.name, 'r').read(), height=800)
+
+    # -------------------------------------
+    # 3. Disease Analysis
+    # -------------------------------------
+    if 'Disease Associated' in ppi_df.columns:
+        st.subheader("Disease-Specific Analysis")
+        
+        # Disease distribution pie chart
+        disease_counts = ppi_df['Disease Associated'].value_counts().reset_index()
+        fig_pie = px.pie(
+            disease_counts,
+            names='Disease Associated',
+            values='count',
+            title="Distribution by Disease"
+        )
+        st.plotly_chart(fig_pie, use_container_width=True)
+        
+        # Filter data by disease
+        selected_disease = st.selectbox(
+            "Select Disease for Detailed Analysis",
+            ppi_df['Disease Associated'].unique()
+        )
+        filtered_data = ppi_df[ppi_df['Disease Associated'] == selected_disease]
+        
+        # Display filtered interactions
+        st.write(f"Interactions associated with {selected_disease}:")
+        st.dataframe(filtered_data[['Protein A', 'Protein B', 'Experimental System', 'Pubmed ID']])
+
+    # -------------------------------------
+    # 4. Experimental Evidence Analysis
+    # -------------------------------------
+    st.subheader("Experimental System Distribution")
+    exp_systems = ppi_df['Experimental System'].value_counts().reset_index()
+    fig_exp = px.bar(
+        exp_systems,
+        x='count',
+        y='Experimental System',
+        orientation='h',
+        title="Types of Experimental Evidence"
+    )
+    st.plotly_chart(fig_exp, use_container_width=True)
+
+    # -------------------------------------
+    # 5. Combined Score Distribution
+    # -------------------------------------
+    st.subheader("Combined Score Analysis")
+    fig_score = px.histogram(
+        ppi_df,
+        x='Combined Score',
+        nbins=50,
+        title="Distribution of Combined Confidence Scores"
+    )
+    st.plotly_chart(fig_score, use_container_width=True)
+
+    # -------------------------------------
+    # 6. Interaction Heatmaps
+    # -------------------------------------
+    st.subheader("Protein Interaction Heatmaps")
+    
+    # Filter high confidence interactions
+    high_conf = ppi_df[ppi_df['Combined Score'] > 0.7]  # Adjust threshold as needed
+    
+    # Get unique proteins with interactions
+    all_proteins = pd.unique(pd.concat([high_conf['Protein A'], high_conf['Protein B']]))
+    
+    # Create protein selector
+    selected_protein = st.selectbox(
+        "Select Protein for Interaction Heatmap",
+        sorted(all_proteins)
+    )
+    
+    # Generate heatmap for selected protein
+    if selected_protein:
+        # Filter interactions for selected protein
+        interactions = high_conf[
+            (high_conf['Protein A'] == selected_protein) | 
+            (high_conf['Protein B'] == selected_protein)
+        ]
+        
+        # Create partner list and scores
+        partners = []
+        scores = []
+        for _, row in interactions.iterrows():
+            partner = row['Protein B'] if row['Protein A'] == selected_protein else row['Protein A']
+            partners.append(partner)
+            scores.append(row['Combined Score'])
+        
+        # Create matrix
+        heatmap_df = pd.DataFrame({
+            'Selected Protein': selected_protein,
+            'Interacting Partner': partners,
+            'Combined Score': scores
+        }).pivot_table(
+            index='Selected Protein',
+            columns='Interacting Partner',
+            values='Combined Score',
+            aggfunc='max'
+        )
+        
+        # Plot heatmap
+        plt.figure(figsize=(14, 3))
+        sns.heatmap(
+            heatmap_df,
+            annot=True,
+            cmap='rocket_r',
+            vmin=0.85,
+            vmax=1,
+            linewidths=0.5,
+            cbar_kws={'label': 'Interaction Confidence'},
+            annot_kws={'size': 9}
+        )
+        plt.title(f"High-Confidence Interactions for {selected_protein}", pad=15)
+        plt.xlabel('Interaction Partners', labelpad=12)
+        plt.ylabel(selected_protein, labelpad=12)
+        plt.xticks(rotation=45, ha='right')
+        plt.yticks(rotation=0)
+        plt.tight_layout()
+        st.pyplot(plt))
+        
+# ---- GITHUB EDIT TAB ----
+with tabs[5]:
+    st.header("🛠️ GitHub Edit Zone")
     st.markdown("""
-      USE THIS SECTION TO ACCESS AND EDIT THE DATASETS DIRECTLY FROM THE GITHUB
-    """) 
+        USE THIS SECTION TO ACCESS AND EDIT THE DATASETS DIRECTLY FROM THE GITHUB
+    """)
 
     github_links = {
         "PPI Data (CSV)": "https://github.com/MeghanaVaddella/my-cv-dataset/blob/main/my-cv-data.csv",
@@ -455,5 +667,5 @@ with tabs[4]:
         st.markdown(f"- 🔗 **[{label}]({url})**")
 
     st.markdown("""
-    📢 **CHANGES IN THE GITHUB WILL BE REFLECTED IN THE APP WHEN THE PAGE IS RELOADED!!**
-    """)   
+        📢 **CHANGES IN THE GITHUB WILL BE REFLECTED IN THE APP WHEN THE PAGE IS RELOADED!!**
+    """)
