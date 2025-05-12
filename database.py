@@ -413,32 +413,18 @@ with tabs[3]:  # 3D Visualizer tab
 
     st.markdown("---")
 
-   # ---- Upload PDB for Visualization ----
-    st.markdown("---")
-    st.subheader("📦 Upload Predicted PDB File from AlphaFold")
-
-    pdb_file = st.file_uploader("Upload PDB file", type=["pdb"], key="upload_pdb")
+  # ---- Upload PDB file ----
+    st.write("### 📦 Upload Predicted PDB Structure")
+    pdb_file = st.file_uploader("Upload PDB file (predicted or modeled)", type=["pdb"])
 
     if pdb_file:
-        pdb_bytes = pdb_file.read()
-        pdb_str = pdb_bytes.decode("utf-8", errors="replace")  # Convert bytes to string
-
-        st.success("✅ PDB uploaded successfully!")
-
-        col1, col2 = st.columns([2, 1])
-
-        with col1:
-            st.markdown("### 📄 PDB File Preview")
-            st.text_area("PDB File Content", pdb_str, height=500)
-            st.download_button(
-                label="📥 Download PDB",
-                data=pdb_str,
-                file_name="uploaded_structure.pdb",
-                mime="chemical/x-pdb"
-            )
-
-        with col2:
-            pass  # No additional UI here
+        pdb_str = pdb_file.read().decode("utf-8")
+        viewer = py3Dmol.view(width=1000, height=600)
+        viewer.addModel(pdb_str, "pdb")
+        viewer.setStyle({'model': 0}, {'cartoon': {'color': 'spectrum'}})
+        viewer.setBackgroundColor("white")
+        viewer.zoomTo()
+        st.components.v1.html(viewer._make_html(), height=600)
 
 # ---- NEW DATA VISUALIZATION TAB ----
 with tabs[4]:  # Index 4 for the 5th tab
