@@ -7,8 +7,6 @@ import streamlit.components.v1 as components
 import py3Dmol
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns 
-import plotly.express as px
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="NEUROGEN PPI", layout="wide")
@@ -181,7 +179,6 @@ tabs = st.tabs([
     "Data", 
     "3D Structure Data", 
     "3D Visualizer", 
-    "Data Visualization",  
     "GitHub Edit"
 ])
 
@@ -323,60 +320,58 @@ with tabs[3]:  # 3D Visualizer tab
 
         if pdb_ids:
             molstar_url = "https://molstar.org/viewer/?url=" + ",".join([f"https://files.rcsb.org/download/{pdb}.pdb" for pdb in pdb_ids])
-            st.components.v1.iframe(molstar_url, width=1000, height=600)
+            st.components.v1.iframe(molstar_url, width=1000, height=400)
         else:
             st.warning("No valid PDB IDs found for visualization.")
 
     st.markdown("---")
 
     # ---- AlphaFold 3D Viewer ----
-st.write("### 🧬 AlphaFold-based 3D Viewer (py3Dmol)")
+    st.write("### 🧬 AlphaFold-based 3D Viewer (py3Dmol)")
 
-def fetch_alphafold_pdb(uniprot_id):
-    """Fetch AlphaFold PDB file given a UniProt ID"""
-    url = f"https://alphafold.ebi.ac.uk/files/AF-{uniprot_id}-F1-model_v4.pdb"
-    response = requests.get(url)
-    return response.text if response.status_code == 200 else None
+    def fetch_alphafold_pdb(uniprot_id):
+        """Fetch AlphaFold PDB file given a UniProt ID"""
+        url = f"https://alphafold.ebi.ac.uk/files/AF-{uniprot_id}-F1-model_v4.pdb"
+        response = requests.get(url)
+        return response.text if response.status_code == 200 else None
 
-col3, col4 = st.columns(2)
-with col3:
-    uniprot_a_options = df_3d['UniProtID A'].dropna().unique().tolist()
-    selected_uniprot_a = st.selectbox("🔍 Select UniProt ID A (AlphaFold)", options=[""] + uniprot_a_options, key="select_uniprot_a")
+    col3, col4 = st.columns(2)
+    with col3:
+        uniprot_a_options = df_3d['UniProtID A'].dropna().unique().tolist()
+        selected_uniprot_a = st.selectbox("🔍 Select UniProt ID A (AlphaFold)", options=[""] + uniprot_a_options, key="select_uniprot_a")
 
-with col4:
-    uniprot_b_options = df_3d['UniProtID B'].dropna().unique().tolist()
-    selected_uniprot_b = st.selectbox("🔍 Select UniProt ID B (AlphaFold)", options=[""] + uniprot_b_options, key="select_uniprot_b")
+    with col4:
+        uniprot_b_options = df_3d['UniProtID B'].dropna().unique().tolist()
+        selected_uniprot_b = st.selectbox("🔍 Select UniProt ID B (AlphaFold)", options=[""] + uniprot_b_options, key="select_uniprot_b")
 
-if selected_uniprot_a and selected_uniprot_b:
-    pdb_a = fetch_alphafold_pdb(selected_uniprot_a)
-    pdb_b = fetch_alphafold_pdb(selected_uniprot_b)
+    if selected_uniprot_a and selected_uniprot_b:
+        pdb_a = fetch_alphafold_pdb(selected_uniprot_a)
+        pdb_b = fetch_alphafold_pdb(selected_uniprot_b)
 
-    if pdb_a and pdb_b:
-        st.subheader("🧪 AlphaFold 3D Viewer")
-        viewer = py3Dmol.view(width=1000, height=600)
-        viewer.addModel(pdb_a, "pdb")
-        viewer.setStyle({'model': 0}, {'cartoon': {'color': 'salmon'}})
-        viewer.addModel(pdb_b, "pdb")
-        viewer.setStyle({'model': 1}, {'cartoon': {'color': 'skyblue'}})
-        viewer.setBackgroundColor("white")
-        viewer.zoomTo()
-        
-        # Use show() method instead of _make_html()
-        st.components.v1.html(viewer.show(), height=600)
+        if pdb_a and pdb_b:
+            st.subheader("🧪 AlphaFold 3D Viewer")
+            viewer = py3Dmol.view(width=1000, height=600)
+            viewer.addModel(pdb_a, "pdb")
+            viewer.setStyle({'model': 0}, {'cartoon': {'color': 'salmon'}})
+            viewer.addModel(pdb_b, "pdb")
+            viewer.setStyle({'model': 1}, {'cartoon': {'color': 'skyblue'}})
+            viewer.setBackgroundColor("white")
+            viewer.zoomTo()
+            st.components.v1.html(viewer._make_html(), height=600)
 
-        # Download combined PDB
-        combined_pdb = f"REMARK   Protein A: {selected_uniprot_a}\n{pdb_a}\nREMARK   Protein B: {selected_uniprot_b}\n{pdb_b}"
-        st.subheader("💾 Download Combined Structure")
-        st.download_button(
-            label="⬇️ Download Combined PDB",
-            data=combined_pdb,
-            file_name=f"{selected_uniprot_a}_{selected_uniprot_b}_combined.pdb",
-            mime="chemical/x-pdb"
-        )
-    else:
-        st.error("❌ Failed to fetch one or both AlphaFold PDB files.")
+            # Download combined PDB
+            combined_pdb = f"REMARK   Protein A: {selected_uniprot_a}\n{pdb_a}\nREMARK   Protein B: {selected_uniprot_b}\n{pdb_b}"
+            st.subheader("💾 Download Combined Structure")
+            st.download_button(
+                label="⬇️ Download Combined PDB",
+                data=combined_pdb,
+                file_name=f"{selected_uniprot_a}_{selected_uniprot_b}_combined.pdb",
+                mime="chemical/x-pdb"
+            )
+        else:
+            st.error("❌ Failed to fetch one or both AlphaFold PDB files.")
 
-st.markdown("---")
+    st.markdown("---")
 
     # ---- AlphaFold-Multimer FASTA Generator ----
     st.write("### 🧬 Predict Interactions using AlphaFold-Multimer")
@@ -414,130 +409,35 @@ st.markdown("---")
 
     st.markdown("---")
 
-    # ---- Upload PDB file ----
-    st.write("### 📦 Upload Predicted PDB Structure")
-    pdb_file = st.file_uploader("Upload PDB file (predicted or modeled)", type=["pdb"])
+   # ---- Upload PDB for Visualization ----
+    st.markdown("---")
+    st.subheader("📦 Upload Predicted PDB File from AlphaFold")
+
+    pdb_file = st.file_uploader("Upload PDB file", type=["pdb"], key="upload_pdb")
 
     if pdb_file:
-        pdb_str = pdb_file.read().decode("utf-8")
-        viewer = py3Dmol.view(width=1000, height=600)
-        viewer.addModel(pdb_str, "pdb")
-        viewer.setStyle({'model': 0}, {'cartoon': {'color': 'spectrum'}})
-        viewer.setBackgroundColor("white")
-        viewer.zoomTo()
-        st.components.v1.html(viewer._make_html(), height=600)
+        pdb_bytes = pdb_file.read()
+        pdb_str = pdb_bytes.decode("utf-8", errors="replace")  # Convert bytes to string
 
-# ---- DATA VISUALIZATION TAB ----
-with tabs[4]:  # Index 4 for the 5th tab
-    st.header("📊 Data Visualization")
-    
-    # --- Protein Selection for Heatmap ---
-    st.subheader("Protein Interaction Heatmap")
-    
-    # Get unique proteins from both columns
-    all_proteins = sorted(pd.concat([ppi_df['Protein A'], ppi_df['Protein B']]).unique())
-    selected_protein = st.selectbox("Select Protein A to view top interactions", all_proteins)
-    
-    # Filter and process data
-    filtered_df = ppi_df[(ppi_df['Protein A'] == selected_protein) | 
-                        (ppi_df['Protein B'] == selected_protein)]
-    
-    # Get top 3 interactions based on Combined Score
-    top_interactions = filtered_df.sort_values(by='Combined Score', ascending=False).head(3)
-    
-    # Create a pivot table for heatmap
-    heatmap_data = top_interactions.pivot_table(
-        index='Protein A',
-        columns='Protein B',
-        values='Combined Score',
-        aggfunc='mean'
-    ).fillna(0)
-    
-    # --- Display Heatmap ---
-    if not heatmap_data.empty:
-        try:
-            plt.figure(figsize=(10, 4))
-            sns.heatmap(
-                heatmap_data,
-                annot=True,
-                fmt=".2f",
-                cmap="YlGnBu",
-                linewidths=.5,
-                cbar_kws={'label': 'Combined Score'}
+        st.success("✅ PDB uploaded successfully!")
+
+        col1, col2 = st.columns([2, 1])
+
+        with col1:
+            st.markdown("### 📄 PDB File Preview")
+            st.text_area("PDB File Content", pdb_str, height=500)
+            st.download_button(
+                label="📥 Download PDB",
+                data=pdb_str,
+                file_name="uploaded_structure.pdb",
+                mime="chemical/x-pdb"
             )
-            plt.title(f"Top 3 Interactions for {selected_protein}")
-            plt.xlabel("Protein B")
-            plt.ylabel("Protein A")
-            plt.tight_layout()
-            st.pyplot(plt)
-        except Exception as e:
-            st.error(f"Error generating heatmap: {str(e)}")
-    else:
-        st.warning(f"No interactions found for {selected_protein}")
-        
-    # Calculate interaction counts and average scores
-    protein_stats = (
-        pd.concat([ppi_df['Protein A'], ppi_df['Protein B']])
-        .value_counts()
-        .reset_index(name='Interaction Count')
-        .merge(
-            ppi_df.groupby('Protein A')['Combined Score'].mean().reset_index(),
-            left_on='index', right_on='Protein A', how='left'
-        )
-        .rename(columns={'Combined Score': 'Avg Combined Score'})
-        .head(20)
-    )
-    
-    # Create bar chart
-    if not protein_stats.empty:
-        fig_bar = px.bar(
-            protein_stats,
-            x='Interaction Count',
-            y='index',
-            orientation='h',
-            color='Avg Combined Score',
-            color_continuous_scale='Viridis',
-            title="Top 20 Proteins: Interaction Count vs. Combined Score"
-        )
-        st.plotly_chart(fig_bar, use_container_width=True)
-    
-    # --- Experimental System Distribution ---
-    st.subheader("Experimental System Distribution")
-    if 'Experimental System' in ppi_df.columns:
-        exp_systems = ppi_df['Experimental System'].value_counts().reset_index()
-        fig_exp = px.bar(
-            exp_systems,
-            x='count',
-            y='Experimental System',
-            orientation='h',
-            title="Types of Experimental Evidence"
-        )
-        st.plotly_chart(fig_exp, use_container_width=True)
-    
-    # --- Combined Score Analysis ---
-    st.subheader("Combined Score Analysis")
-    fig_score = px.histogram(
-        ppi_df,
-        x='Combined Score',
-        nbins=50,
-        title="Distribution of Combined Confidence Scores"
-    )
-    st.plotly_chart(fig_score, use_container_width=True)
-    
-     # --- Dataset Information ---
-    st.subheader("Dataset Information")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Total Interactions", len(ppi_df))
-    with col2:
-        st.metric("Unique Proteins", len(pd.concat([ppi_df['Protein A'], ppi_df['Protein B']]).unique()))
-    with col3:
-        st.metric("Diseases Covered", len(ppi_df['Disease Associated'].unique()))    
-    # --- Top Proteins by Interaction Count & Combined Score ---
-    st.subheader("Top Proteins by Interaction Count & Combined Score")
-    
+
+        with col2:
+            pass  # No additional UI here
+
 # ---- GITHUB EDIT TAB ----
-with tabs[5]:
+with tabs[4]:
     st.header("🛠️ GitHub Edit Zone")
 
     st.markdown("""
