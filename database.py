@@ -7,6 +7,7 @@ import streamlit.components.v1 as components
 import py3Dmol
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns 
 import plotly.express as px
 
 # --- PAGE CONFIG ---
@@ -180,7 +181,7 @@ tabs = st.tabs([
     "Data", 
     "3D Structure Data", 
     "3D Visualizer", 
-    "Data Visualization",  # NEW TAB ADDED HERE
+    "Data Visualization",  
     "GitHub Edit"
 ])
 
@@ -424,13 +425,54 @@ with tabs[3]:  # 3D Visualizer tab
         viewer.zoomTo()
         st.components.v1.html(viewer._make_html(), height=600)
 
-# ---- NEW DATA VISUALIZATION TAB ----
+# ---- DATA VISUALIZATION TAB ----
 with tabs[4]:  # Index 4 for the 5th tab
     st.header("📊 Data Visualization")
     
-    # --- Top Proteins by Interaction Count & Combined Score ---
-    st.subheader("Top Proteins by Interaction Count & Combined Score")
+    # --- Protein Selection for Heatmap ---
+    st.subheader("Protein Interaction Heatmap")
     
+    # Get unique proteins from both columns
+    all_proteins = sorted(pd.concat([ppi_df['Protein A'], ppi_df['Protein B']]).unique())
+    selected_protein = st.selectbox("Select Protein A to view top interactions", all_proteins)
+    
+    # Filter and process data
+    filtered_df = ppi_df[(ppi_df['Protein A'] == selected_protein) | 
+                        (ppi_df['Protein B'] == selected_protein)]
+    
+    # Get top 3 interactions based on Combined Score
+    top_interactions = filtered_df.sort_values(by='Combined Score', ascending=False).head(3)
+    
+    # Create a pivot table for heatmap
+    heatmap_data = top_interactions.pivot_table(
+        index='Protein A',
+        columns='Protein B',
+        values='Combined Score',
+        aggfunc='mean'
+    ).fillna(0)
+    
+    # --- Display Heatmap ---
+    if not heatmap_data.empty:
+        try:
+            plt.figure(figsize=(10, 4))
+            sns.heatmap(
+                heatmap_data,
+                annot=True,
+                fmt=".2f",
+                cmap="YlGnBu",
+                linewidths=.5,
+                cbar_kws={'label': 'Combined Score'}
+            )
+            plt.title(f"Top 3 Interactions for {selected_protein}")
+            plt.xlabel("Protein B")
+            plt.ylabel("Protein A")
+            plt.tight_layout()
+            st.pyplot(plt)
+        except Exception as e:
+            st.error(f"Error generating heatmap: {str(e)}")
+    else:
+        st.warning(f"No interactions found for {selected_protein}")
+        
     # Calculate interaction counts and average scores
     protein_stats = (
         pd.concat([ppi_df['Protein A'], ppi_df['Protein B']])
@@ -480,7 +522,7 @@ with tabs[4]:  # Index 4 for the 5th tab
     )
     st.plotly_chart(fig_score, use_container_width=True)
     
-    # --- Dataset Information ---
+     # --- Dataset Information ---
     st.subheader("Dataset Information")
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -488,8 +530,10 @@ with tabs[4]:  # Index 4 for the 5th tab
     with col2:
         st.metric("Unique Proteins", len(pd.concat([ppi_df['Protein A'], ppi_df['Protein B']]).unique()))
     with col3:
-        st.metric("Diseases Covered", len(ppi_df['Disease Associated'].unique()))
-                  
+        st.metric("Diseases Covered", len(ppi_df['Disease Associated'].unique()))    
+    # --- Top Proteins by Interaction Count & Combined Score ---
+    st.subheader("Top Proteins by Interaction Count & Combined Score")
+    
 # ---- GITHUB EDIT TAB ----
 with tabs[5]:
     st.header("🛠️ GitHub Edit Zone")
