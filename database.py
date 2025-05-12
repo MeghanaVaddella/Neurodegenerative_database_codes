@@ -403,6 +403,18 @@ with tabs[3]:  # 3D Visualizer tab
             st.warning("⚠️ Please select both UniProt IDs for FASTA generation.")
 
     st.markdown("---")
+     # ---- Upload PDB file ----
+    st.write("### 📦 Upload Predicted PDB Structure")
+    pdb_file = st.file_uploader("Upload PDB file (predicted or modeled)", type=["pdb"])
+
+    if pdb_file:
+        pdb_str = pdb_file.read().decode("utf-8")
+        viewer = py3Dmol.view(width=1000, height=600)
+        viewer.addModel(pdb_str, "pdb")
+        viewer.setStyle({'model': 0}, {'cartoon': {'color': 'spectrum'}})
+        viewer.setBackgroundColor("white")
+        viewer.zoomTo()
+        st.components.v1.html(viewer._make_html(), height=600)
 
 # ---- DATA VISUALIZER TAB ----
 with tabs[4]:
