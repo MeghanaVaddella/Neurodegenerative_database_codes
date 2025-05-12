@@ -238,7 +238,11 @@ with tabs[1]:
         net = Network(height="600px", width="100%", bgcolor="#FFFFFF", font_color="#000000")
         net.from_nx(G)
         path = tempfile.NamedTemporaryFile(delete=False, suffix=".html").name
-        net.show(path)
+        net.write_html(path)
+        with open(path, 'r', encoding='utf-8') as f:
+           html_content = f.read()
+        components.html(html_content, height=600, scrolling=True)
+
         components.html(open(path, 'r').read(), height=600, scrolling=True)
 # ---- 3D STRUCTURE DATA TAB ----
 with tabs[2]:
