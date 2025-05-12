@@ -324,7 +324,7 @@ with tabs[3]:  # 3D Visualizer tab
 
         if pdb_ids:
             molstar_url = "https://molstar.org/viewer/?url=" + ",".join([f"https://files.rcsb.org/download/{pdb}.pdb" for pdb in pdb_ids])
-            st.components.v1.iframe(molstar_url, width=1000, height=400)
+            st.components.v1.iframe(molstar_url, width=1000, height=600)
         else:
             st.warning("No valid PDB IDs found for visualization.")
 
@@ -413,7 +413,7 @@ with tabs[3]:  # 3D Visualizer tab
 
     st.markdown("---")
 
-  # ---- Upload PDB file ----
+    # ---- Upload PDB file ----
     st.write("### 📦 Upload Predicted PDB Structure")
     pdb_file = st.file_uploader("Upload PDB file (predicted or modeled)", type=["pdb"])
 
