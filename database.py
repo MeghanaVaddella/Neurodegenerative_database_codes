@@ -7,6 +7,9 @@ import streamlit.components.v1 as components
 import py3Dmol
 import matplotlib.pyplot as plt
 import numpy as np
+import tempfile
+import plotly.express as px
+import seaborn as sns
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="NEUROGEN PPI", layout="wide")
@@ -315,7 +318,7 @@ with tabs[3]:
                     st.warning("No matching Protein B found.")
 
         # Mol* Viewer
-        st.write("### 🧬 Mol* (MolStar) Viewer")
+        st.write("### Mol* (MolStar) Viewer")
         pdb_ids = list(filter(lambda x: x != "NA", pdb_ids))
 
         if pdb_ids:
@@ -327,7 +330,7 @@ with tabs[3]:
     st.markdown("---")
 
     # ---- AlphaFold 3D Viewer ----
-    st.write("### 🧬 AlphaFold-based 3D Viewer (py3Dmol)")
+    st.write("### AlphaFold-based 3D Viewer (py3Dmol)")
 
     def fetch_alphafold_pdb(uniprot_id):
         """Fetch AlphaFold PDB file given a UniProt ID"""
@@ -420,7 +423,7 @@ with tabs[3]:
     st.markdown("---")
 
     # ---- Upload PDB for Visualization ----
-    st.subheader("📦 Upload Predicted PDB File from AlphaFold")
+    st.subheader(" Upload Predicted PDB File from AlphaFold")
     pdb_file = st.file_uploader("Upload PDB file", type=["pdb"], key="upload_pdb")
 
     if pdb_file:
@@ -450,18 +453,12 @@ with tabs[3]:
             viewer.zoomTo()
             st.components.v1.html(viewer.show(), height=350)
 
-# ---- DATA TAB ----
+# ---- DATA VISUALIZER TAB (formerly Data tab) ----
 with tabs[4]:
     st.header("Data Visualizer")
-    st.dataframe(ppi_df, use_container_width=True, hide_index=True)
-    st.download_button("Download PPI CSV", ppi_df.to_csv(index=False), "PPI_data.csv", "text/csv")
-
-    # -------------------------------------
-    # 1. Top Proteins Bar Chart (with Combined Score)
-    # -------------------------------------
-    st.subheader("Top Proteins by Interaction Count & Combined Score")
     
-    # Calculate interaction counts and average combined score
+    # Top Proteins Bar Chart
+    st.subheader("Top Proteins by Interaction Count & Combined Score")
     protein_stats = (
         pd.concat([ppi_df['Protein A'], ppi_df['Protein B']])
         .value_counts()
@@ -473,8 +470,6 @@ with tabs[4]:
         .rename(columns={'Combined Score': 'Avg Combined Score'})
         .head(20)
     )
-
-    # Create bar chart with Plotly
     fig_bar = px.bar(
         protein_stats,
         x='Interaction Count',
@@ -486,172 +481,98 @@ with tabs[4]:
     )
     st.plotly_chart(fig_bar, use_container_width=True)
 
-    # -------------------------------------
-    # 2. Interactive Network (with Experimental Systems)
-    # -------------------------------------
+    # Interactive Network
     st.subheader("Interactive PPI Network with Experimental Evidence")
-
-    # Create NetworkX graph with edge attributes
     G = nx.from_pandas_edgelist(
         ppi_df,
         source='Protein A',
         target='Protein B',
         edge_attr=['Experimental System', 'Combined Score', 'Pubmed ID', 'Author']
     )
-
-    # Configure PyVis network
-    net = Network(
-        height="800px",
-        width="100%",
-        notebook=False,
-        bgcolor="white",
-        font_color="black",
-        select_menu=True,
-        filter_menu=True
-    )
-
-    # Add nodes and edges with metadata
+    net = Network(height="800px", width="100%", notebook=False, bgcolor="white",
+                font_color="black", select_menu=True, filter_menu=True)
+    
     for node in G.nodes():
         net.add_node(node, title=node)
-
+    
     for edge in G.edges(data=True):
         net.add_edge(
             edge[0], edge[1],
-            title=f"""
-            Experimental System: {edge[2]['Experimental System']}<br>
-            PubMed ID: {edge[2]['Pubmed ID']}<br>
-            Author: {edge[2]['Author']}<br>
-            Combined Score: {edge[2]['Combined Score']}
-            """,
-            value=edge[2]['Combined Score']  # For edge thickness
+            title=f"Experimental System: {edge[2]['Experimental System']}<br>PubMed ID: {edge[2]['Pubmed ID']}<br>Author: {edge[2]['Author']}<br>Combined Score: {edge[2]['Combined Score']}",
+            value=edge[2]['Combined Score']
         )
-
-    # Save and display network
+    
     with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as tmpfile:
         net.save_graph(tmpfile.name)
         st.components.v1.html(open(tmpfile.name, 'r').read(), height=800)
 
-    # -------------------------------------
-    # 3. Disease Analysis
-    # -------------------------------------
+    # Disease Analysis
     if 'Disease Associated' in ppi_df.columns:
         st.subheader("Disease-Specific Analysis")
-        
-        # Disease distribution pie chart
         disease_counts = ppi_df['Disease Associated'].value_counts().reset_index()
-        fig_pie = px.pie(
-            disease_counts,
-            names='Disease Associated',
-            values='count',
-            title="Distribution by Disease"
-        )
+        fig_pie = px.pie(disease_counts, names='Disease Associated', values='count',
+                        title="Distribution by Disease")
         st.plotly_chart(fig_pie, use_container_width=True)
         
-        # Filter data by disease
-        selected_disease = st.selectbox(
-            "Select Disease for Detailed Analysis",
-            ppi_df['Disease Associated'].unique()
-        )
+        selected_disease = st.selectbox("Select Disease for Detailed Analysis",
+                                      ppi_df['Disease Associated'].unique())
         filtered_data = ppi_df[ppi_df['Disease Associated'] == selected_disease]
-        
-        # Display filtered interactions
         st.write(f"Interactions associated with {selected_disease}:")
         st.dataframe(filtered_data[['Protein A', 'Protein B', 'Experimental System', 'Pubmed ID']])
 
-    # -------------------------------------
-    # 4. Experimental Evidence Analysis
-    # -------------------------------------
+    # Experimental Evidence
     st.subheader("Experimental System Distribution")
     exp_systems = ppi_df['Experimental System'].value_counts().reset_index()
-    fig_exp = px.bar(
-        exp_systems,
-        x='count',
-        y='Experimental System',
-        orientation='h',
-        title="Types of Experimental Evidence"
-    )
+    fig_exp = px.bar(exp_systems, x='count', y='Experimental System', orientation='h',
+                   title="Types of Experimental Evidence")
     st.plotly_chart(fig_exp, use_container_width=True)
 
-    # -------------------------------------
-    # 5. Combined Score Distribution
-    # -------------------------------------
+    # Combined Score Analysis
     st.subheader("Combined Score Analysis")
-    fig_score = px.histogram(
-        ppi_df,
-        x='Combined Score',
-        nbins=50,
-        title="Distribution of Combined Confidence Scores"
-    )
+    fig_score = px.histogram(ppi_df, x='Combined Score', nbins=50,
+                           title="Distribution of Combined Confidence Scores")
     st.plotly_chart(fig_score, use_container_width=True)
 
-    # -------------------------------------
-    # 6. Interaction Heatmaps
-    # -------------------------------------
+    # Interaction Heatmaps
     st.subheader("Protein Interaction Heatmaps")
-    
-    # Filter high confidence interactions
-    high_conf = ppi_df[ppi_df['Combined Score'] > 0.7]  # Adjust threshold as needed
-    
-    # Get unique proteins with interactions
+    high_conf = ppi_df[ppi_df['Combined Score'] > 0.7]
     all_proteins = pd.unique(pd.concat([high_conf['Protein A'], high_conf['Protein B']]))
     
-    # Create protein selector
-    selected_protein = st.selectbox(
-        "Select Protein for Interaction Heatmap",
-        sorted(all_proteins)
-    )
+    selected_protein = st.selectbox("Select Protein for Interaction Heatmap",
+                                  sorted(all_proteins))
     
-    # Generate heatmap for selected protein
     if selected_protein:
-        # Filter interactions for selected protein
         interactions = high_conf[
             (high_conf['Protein A'] == selected_protein) | 
             (high_conf['Protein B'] == selected_protein)
         ]
-        
-        # Create partner list and scores
-        partners = []
-        scores = []
+        partners, scores = [], []
         for _, row in interactions.iterrows():
             partner = row['Protein B'] if row['Protein A'] == selected_protein else row['Protein A']
             partners.append(partner)
             scores.append(row['Combined Score'])
         
-        # Create matrix
         heatmap_df = pd.DataFrame({
             'Selected Protein': selected_protein,
             'Interacting Partner': partners,
             'Combined Score': scores
-        }).pivot_table(
-            index='Selected Protein',
-            columns='Interacting Partner',
-            values='Combined Score',
-            aggfunc='max'
-        )
+        }).pivot_table(index='Selected Protein', columns='Interacting Partner',
+                     values='Combined Score', aggfunc='max')
         
-        # Plot heatmap
         plt.figure(figsize=(14, 3))
-        sns.heatmap(
-            heatmap_df,
-            annot=True,
-            cmap='rocket_r',
-            vmin=0.85,
-            vmax=1,
-            linewidths=0.5,
-            cbar_kws={'label': 'Interaction Confidence'},
-            annot_kws={'size': 9}
-        )
+        sns.heatmap(heatmap_df, annot=True, cmap='rocket_r', vmin=0.85, vmax=1,
+                  linewidths=0.5, cbar_kws={'label': 'Interaction Confidence'},
+                  annot_kws={'size': 9})
         plt.title(f"High-Confidence Interactions for {selected_protein}", pad=15)
         plt.xlabel('Interaction Partners', labelpad=12)
         plt.ylabel(selected_protein, labelpad=12)
         plt.xticks(rotation=45, ha='right')
-        plt.yticks(rotation=0)
         plt.tight_layout()
-        st.pyplot(plt))
+        st.pyplot(plt)
         
 # ---- GITHUB EDIT TAB ----
 with tabs[5]:
-    st.header("🛠️ GitHub Edit Zone")
+    st.header("GitHub Edit Zone")
     st.markdown("""
         USE THIS SECTION TO ACCESS AND EDIT THE DATASETS DIRECTLY FROM THE GITHUB
     """)
@@ -667,5 +588,5 @@ with tabs[5]:
         st.markdown(f"- 🔗 **[{label}]({url})**")
 
     st.markdown("""
-        📢 **CHANGES IN THE GITHUB WILL BE REFLECTED IN THE APP WHEN THE PAGE IS RELOADED!!**
+         **CHANGES IN THE GITHUB WILL BE REFLECTED IN THE APP WHEN THE PAGE IS RELOADED!!**
     """)
