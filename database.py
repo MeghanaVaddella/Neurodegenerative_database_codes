@@ -231,19 +231,20 @@ with tabs[1]:
         edges = df[(df['Protein A'] == protein) | (df['Protein B'] == protein)]
         for _, row in edges.iterrows():
             G.add_edge(row['Protein A'], row['Protein B'])
-        return G
-
-    if selected_protein:
-        G = build_ppi_graph(selected_protein, ppi_df)
-        net = Network(height="600px", width="100%", bgcolor="#FFFFFF", font_color="#000000")
+        net = Network(height="600px", width="100%", directed=False)
         net.from_nx(G)
-        path = tempfile.NamedTemporaryFile(delete=False, suffix=".html").name
-        net.write_html(path)
-        with open(path, 'r', encoding='utf-8') as f:
-           html_content = f.read()
-        components.html(html_content, height=600, scrolling=True)
+        net.save_graph("ppi_graph.html")
+        return "ppi_graph.html"
 
-        components.html(open(path, 'r').read(), height=600, scrolling=True)
+    if st.button("Show PPI Network"):
+        if not ppi_df.empty:
+            file_path = build_ppi_graph(selected_protein, ppi_df)
+            components.html(open(file_path, 'r').read(), height=600)
+            with open(file_path, "rb") as f:
+                st.download_button("Download Network HTML", f, "ppi_network.html", "text/html")
+        else:
+            st.warning("PPI data is empty.")
+        
 # ---- 3D STRUCTURE DATA TAB ----
 with tabs[2]:
     st.header("3D Structure Available Proteins")
