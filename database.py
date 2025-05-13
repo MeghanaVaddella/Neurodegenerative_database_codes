@@ -352,7 +352,7 @@ with tabs[3]:  # 3D Visualizer tab
             viewer.setStyle({'model': 1}, {'cartoon': {'color': 'skyblue'}})
             viewer.setBackgroundColor("white")
             viewer.zoomTo()
-            st.components.v1.html(viewer._make_html(), height=600)
+            st.components.v1.html(viewer._make_html(), height=300)
 
             # Download combined PDB
             combined_pdb = f"REMARK   Protein A: {selected_uniprot_a}\n{pdb_a}\nREMARK   Protein B: {selected_uniprot_b}\n{pdb_b}"
@@ -403,6 +403,7 @@ with tabs[3]:  # 3D Visualizer tab
             st.warning("⚠️ Please select both UniProt IDs for FASTA generation.")
 
     st.markdown("---")
+    
      # ---- Upload PDB file ----
     st.subheader("📦 Upload Predicted PDB File from AlphaFold")
     pdb_file = st.file_uploader("Upload PDB file", type=["pdb"], key="upload_pdb")
@@ -510,32 +511,6 @@ with tabs[4]:
         title="Top 20 Proteins: Interaction Count vs. Combined Score"
     )
     st.plotly_chart(fig_bar, use_container_width=True)
-
-    # ---- Interactive Network ----
-    st.subheader("Interactive PPI Network with Experimental Evidence")
-    G = nx.from_pandas_edgelist(
-        df,
-        source='Protein A',
-        target='Protein B',
-        edge_attr=['Experimental System', 'Combined Score', 'Pubmed ID', 'Author']
-    )
-    net = Network(height="800px", width="100%", notebook=False, bgcolor="white", font_color="black", select_menu=True, filter_menu=True)
-    for node in G.nodes():
-        net.add_node(node, title=node)
-    for edge in G.edges(data=True):
-        net.add_edge(
-            edge[0], edge[1],
-            title=f"""
-            Experimental System: {edge[2]['Experimental System']}<br>
-            PubMed ID: {edge[2]['Pubmed ID']}<br>
-            Author: {edge[2]['Author']}<br>
-            Combined Score: {edge[2]['Combined Score']}
-            """,
-            value=edge[2]['Combined Score']
-        )
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as tmpfile:
-        net.save_graph(tmpfile.name)
-        st.components.v1.html(open(tmpfile.name, 'r').read(), height=800)
 
     # ---- Disease-Specific Analysis ----
     if 'Disease Associated' in df.columns:
