@@ -368,37 +368,58 @@ st.markdown("---")
 st.write("### 🧬 Predict Interactions using AlphaFold-Multimer")
 
 def fetch_sequence(uniprot_id):
-        """Fetch protein sequence from UniProt"""
-        url = f"https://rest.uniprot.org/uniprotkb/{uniprot_id}.fasta"
-        response = requests.get(url)
-        return response.text if response.ok else None
+    """Fetch protein sequence from UniProt"""
+    url = f"https://rest.uniprot.org/uniprotkb/{uniprot_id}.fasta"
+    response = requests.get(url)
+    return response.text if response.ok else None
 
-    fasta_col1, fasta_col2 = st.columns(2)
-    with fasta_col1:
-        fasta_uid1 = st.selectbox("🔍 Select UniProt ID for Protein A (FASTA)", options=[""] + uniprot_a_options, key="select_fasta_a")
+# Select UniProt IDs from dropdowns
+fasta_col1, fasta_col2 = st.columns(2)
 
-    with fasta_col2:
-        fasta_uid2 = st.selectbox("🔍 Select UniProt ID for Protein B (FASTA)", options=[""] + uniprot_b_options, key="select_fasta_b")
+with fasta_col1:
+    fasta_uid1 = st.selectbox(
+        "🔍 Select UniProt ID for Protein A (FASTA)",
+        options=[""] + uniprot_a_options,
+        key="select_fasta_a"
+    )
 
-    if st.button("Generate AlphaFold-Multimer Input (FASTA)"):
-        if fasta_uid1 and fasta_uid2:
-            seq1 = fetch_sequence(fasta_uid1)
-            seq2 = fetch_sequence(fasta_uid2)
+with fasta_col2:
+    fasta_uid2 = st.selectbox(
+        "🔍 Select UniProt ID for Protein B (FASTA)",
+        options=[""] + uniprot_b_options,
+        key="select_fasta_b"
+    )
 
-            if seq1 and seq2:
-                combined_fasta = f"{seq1.strip()}\n{seq2.strip()}"
-                st.success("FASTA file generated successfully.")
-                st.download_button("⬇️ Download FASTA", data=combined_fasta, file_name="multimer_input.fasta", mime="text/plain")
-                st.code(combined_fasta)
+# Generate FASTA on button click
+if st.button("Generate AlphaFold-Multimer Input (FASTA)"):
+    if fasta_uid1 and fasta_uid2:
+        seq1 = fetch_sequence(fasta_uid1)
+        seq2 = fetch_sequence(fasta_uid2)
 
-                colab_link = "https://colab.research.google.com/github/sokrypton/ColabFold/blob/main/AlphaFold2.ipynb"
-                st.markdown(f"🔗 **[Open AlphaFold-Multimer in Google Colab]({colab_link})**", unsafe_allow_html=True)
-            else:
-                st.error("❌ Error fetching sequences. Check UniProt IDs.")
+        if seq1 and seq2:
+            combined_fasta = f"{seq1.strip()}\n{seq2.strip()}"
+            st.success("✅ FASTA file generated successfully.")
+            st.download_button(
+                "⬇️ Download FASTA",
+                data=combined_fasta,
+                file_name="multimer_input.fasta",
+                mime="text/plain"
+            )
+            st.code(combined_fasta)
+
+            # ColabFold link
+            colab_link = "https://colab.research.google.com/github/sokrypton/ColabFold/blob/main/AlphaFold2.ipynb"
+            st.markdown(
+                f"🔗 **[Open AlphaFold-Multimer in Google Colab]({colab_link})**",
+                unsafe_allow_html=True
+            )
         else:
-            st.warning("⚠️ Please select both UniProt IDs for FASTA generation.")
+            st.error("❌ Error fetching sequences. Check UniProt IDs.")
+    else:
+        st.warning("⚠️ Please select both UniProt IDs for FASTA generation.")
 
-    st.markdown("---")
+st.markdown("---")
+
 
      # ---- Upload PDB file ----
     st.subheader("📦 Upload Predicted PDB File from AlphaFold")
