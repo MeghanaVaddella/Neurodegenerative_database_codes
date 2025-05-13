@@ -10,6 +10,7 @@ import numpy as np
 import tempfile
 import plotly.express as px
 import seaborn as sns
+from stmol import showmol
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="NEUROGEN PPI", layout="wide")
@@ -255,10 +256,6 @@ with tabs[2]:
     st.dataframe(no_structure_df, use_container_width=True, hide_index=True)
     st.download_button("Download No 3D Structure Data", no_structure_df.to_csv(index=False), "No_3D_structure_data.csv", "text/csv")
 
-
-
-
-
 # ---- 3D VISUALIZER TAB ----
 with tabs[3]:  # 3D Visualizer tab
     st.write("### 3D Protein Structure Visualizer")
@@ -324,44 +321,32 @@ with tabs[3]:  # 3D Visualizer tab
 
     st.markdown("---")
 
-    # ---- AlphaFold 3D Viewer ----
-    st.write("### 🧬 AlphaFold-based 3D Viewer (py3Dmol)")
-
-
+  # ---- AlphaFold 3D Viewer ----
+    st.write("### 🧬 AlphaFold-based 3D Viewer (stmol + py3Dmol)")
+    
     def fetch_alphafold_pdb(uniprot_id):
         """Fetch AlphaFold PDB file given a UniProt ID"""
         url = f"https://alphafold.ebi.ac.uk/files/AF-{uniprot_id}-F1-model_v4.pdb"
         response = requests.get(url)
         return response.text if response.status_code == 200 else None
-
+    
     col3, col4 = st.columns(2)
     with col3:
         uniprot_a_options = df_3d['UniProtID A'].dropna().unique().tolist()
         selected_uniprot_a = st.selectbox("🔍 Select UniProt ID A (AlphaFold)", options=[""] + uniprot_a_options, key="select_uniprot_a")
-
+    
     with col4:
         uniprot_b_options = df_3d['UniProtID B'].dropna().unique().tolist()
         selected_uniprot_b = st.selectbox("🔍 Select UniProt ID B (AlphaFold)", options=[""] + uniprot_b_options, key="select_uniprot_b")
-
-
-
-
-
-
-
-
-
-
-
-
+    
     if selected_uniprot_a and selected_uniprot_b:
         pdb_a = fetch_alphafold_pdb(selected_uniprot_a)
         pdb_b = fetch_alphafold_pdb(selected_uniprot_b)
-
-
+    
         if pdb_a and pdb_b:
             st.subheader("🧪 AlphaFold 3D Viewer")
-
+    
+            # Use stmol + py3Dmol for visualization
             viewer = py3Dmol.view(width=1000, height=600)
             viewer.addModel(pdb_a, "pdb")
             viewer.setStyle({'model': 0}, {'cartoon': {'color': 'salmon'}})
@@ -369,13 +354,12 @@ with tabs[3]:  # 3D Visualizer tab
             viewer.setStyle({'model': 1}, {'cartoon': {'color': 'skyblue'}})
             viewer.setBackgroundColor("white")
             viewer.zoomTo()
-            st.components.v1.html(viewer._make_html(), height=300)
-
+    
+            showmol(viewer, height=600, width=1000)
+    
             # Download combined PDB
-
-
             combined_pdb = f"REMARK   Protein A: {selected_uniprot_a}\n{pdb_a}\nREMARK   Protein B: {selected_uniprot_b}\n{pdb_b}"
-
+    
             st.subheader("💾 Download Combined Structure")
             st.download_button(
                 label="⬇️ Download Combined PDB",
@@ -385,8 +369,8 @@ with tabs[3]:  # 3D Visualizer tab
             )
         else:
             st.error("❌ Failed to fetch one or both AlphaFold PDB files.")
-
-    st.markdown("---")
+    
+        st.markdown("---")
 
     # ---- AlphaFold-Multimer FASTA Generator ----
     st.write("### 🧬 Predict Interactions using AlphaFold-Multimer")
