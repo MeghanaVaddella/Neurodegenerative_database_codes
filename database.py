@@ -422,8 +422,8 @@ st.markdown("---")
 
 
      # ---- Upload PDB file ----
-    st.subheader("📦 Upload Predicted PDB File from AlphaFold")
-    pdb_file = st.file_uploader("Upload PDB file", type=["pdb"], key="upload_pdb")
+     st.subheader("📦 Upload Predicted PDB File from AlphaFold")
+     pdb_file = st.file_uploader("Upload PDB file", type=["pdb"], key="upload_pdb")
 
     if pdb_file:
         pdb_str = pdb_file.read().decode("utf-8", errors="replace")
