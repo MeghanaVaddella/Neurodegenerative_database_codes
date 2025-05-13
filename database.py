@@ -7,6 +7,9 @@ import streamlit.components.v1 as components
 import py3Dmol
 import matplotlib.pyplot as plt
 import numpy as np
+import tempfile
+import plotly.express as px
+import seaborn as sns
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="NEUROGEN PPI", layout="wide")
@@ -22,16 +25,16 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Theme Colors (Dark Mode Palette) ---
-body_bg = "#C4D8E2"            # Columbia Blue - Full Background and Navbar
-header_bg = "#3B5875"          # Police Blue - Header Background
-header_text_color = "#C4AEAD"  # Silver Pink - "NEUROGEN PPI" title
-general_text_color = "#001C3D" # Maastricht Blue - General Text
-button_bg = "#36454F"          # Charcoal - Download Button background
-button_text_color = "#DBE9F4"  # Azureish White - Button text
-table_bg = "#36454F"           # Charcoal - Table background
-table_border_color = "#5D8AA8" # Rackley - Table border
-search_bg = "#A7C7E7"          # Pastel Blue - Search bar background
-remaining_bg = "#8BA8B7"       # Pewter Blue - Other areas
+body_bg = "#C4D8E2"
+header_bg = "#3B5875"
+header_text_color = "#C4AEAD"
+general_text_color = "#001C3D"
+button_bg = "#36454F"
+button_text_color = "#DBE9F4"
+table_bg = "#36454F"
+table_border_color = "#5D8AA8"
+search_bg = "#A7C7E7"
+remaining_bg = "#8BA8B7"
 
 # --- Inject Custom Unified Styling ---
 st.markdown(f"""
@@ -55,7 +58,6 @@ st.markdown(f"""
         letter-spacing: 2px;
         border-radius: 12px;
     }}
-    /* Navigation Tabs Styling */
     div[data-baseweb="tab-list"] {{
         background-color: {body_bg} !important;
         border-bottom: none !important;
@@ -70,7 +72,7 @@ st.markdown(f"""
         margin-right: 1.5rem;
     }}
     button[data-baseweb="tab"]:hover {{
-        color: #002B5B !important; /* Slightly darker Maastricht Blue on hover */
+        color: #002B5B !important;
         background-color: {body_bg} !important;
         border: none !important;
     }}
@@ -78,8 +80,6 @@ st.markdown(f"""
         border-bottom: 2px solid {general_text_color} !important;
         font-weight: bold;
     }}
-
-    /* Button Styling */
     .stButton button, button {{
         background-color: {button_bg} !important;
         color: {button_text_color} !important;
@@ -88,7 +88,6 @@ st.markdown(f"""
         border-radius: 8px;
         padding: 0.5rem 1rem;
     }}
-    /* Input and Select Styling */
     .stTextInput > div > input,
     .stSelectbox > div,
     .stMultiSelect > div,
@@ -100,7 +99,6 @@ st.markdown(f"""
         border: 1px solid {general_text_color} !important;
         border-radius: 6px;
     }}
-    /* Data Frame and Table Styling */
     .stDataFrame, .data-box {{
         background-color: {table_bg} !important;
         color: {general_text_color} !important;
@@ -113,7 +111,6 @@ st.markdown(f"""
         background-color: {table_bg} !important;
         border: 1px solid {table_border_color} !important;
     }}
-    /* Heading Styling */
     h1, h2, h3, h4, h5, h6 {{
         color: {general_text_color} !important;
         font-family: 'MADEVoyager', sans-serif;
@@ -122,7 +119,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # --- Header ---
-st.markdown("<div class='header-text'>NEURODEGEN PPI</div>", unsafe_allow_html=True)
+st.markdown("<div class='header-text'>NEUROGEN PPI</div>", unsafe_allow_html=True)
 
 # ---- LOAD DATA FUNCTIONS ----
 @st.cache_data(show_spinner=False)
@@ -179,12 +176,12 @@ tabs = st.tabs([
     "Data", 
     "3D Structure Data", 
     "3D Visualizer", 
+    "Data Visualizer",
     "GitHub Edit"
 ])
 
 # ---- HOME TAB ----
 with tabs[0]:
-    st.header("🧠 Neurodegenerative Disease Overview")
     keywords = [
         "Alzheimer's Disease", 
         "Parkinson's Disease", 
@@ -192,10 +189,32 @@ with tabs[0]:
         "Multiple Sclerosis (MS)", 
         "Friedreich’s Ataxia (FA)"
     ]
+
     for paragraph in disease_text:
         for keyword in keywords:
             if keyword in paragraph:
-                paragraph = paragraph.replace(keyword, f"<span style='color:#d62728; font-weight:bold;'>{keyword}</span>")
+                paragraph = paragraph.replace(
+                    keyword, 
+                    f"<span style='color:#d62728; font-weight:bold; font-size:25px;'>{keyword}</span>"
+                )
+
+        replacements = {
+            "PROTEIN-PROTEIN INTERACTIONS (PPI)": "<span style='font-weight:bold; color:#800020; font-size:30px;'>PROTEIN-PROTEIN INTERACTIONS (PPI)</span>",
+            "What are Protein-Protein Interactions (PPIs) ?": "<span style='font-weight:bold; color:#8B0000; font-size:30px;'>What are Protein-Protein Interactions (PPIs) ?</span>",
+            "Applications of the Protein-Protein Interactions": "<span style='font-weight:bold; color:#800020; font-size:30px;'>Applications of the Protein-Protein Interactions</span>",
+            "1.Drug Discovery:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>1.Drug Discovery:</span>",
+            "2.Diagnostics:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>2.Diagnostics:</span>",
+            "3.Synthetic Biology:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>3.Synthetic Biology:</span>",
+            "4.Functional Genomics:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>4.Functional Genomics:</span>",
+            "5.Structural Biology:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>5.Structural Biology:</span>",
+            "6.Systems Biology and Target Validation:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>6.Systems Biology and Target Validation:</span>",
+            "What does the database Have?": "<span style='font-weight:bold; color:#800020; font-size:30px;'>What does the database Have?</span>",
+        }
+
+        for old, new in replacements.items():
+            paragraph = paragraph.replace(old, new)
+
+        paragraph = f"<span style='font-size:20px;'>{paragraph}</span>"
         st.markdown(paragraph, unsafe_allow_html=True)
 
 # ---- DATA TAB ----
@@ -226,15 +245,15 @@ with tabs[1]:
         else:
             st.warning("PPI data is empty.")
 
-# ---- 3D STRUCTURE TAB ----
+# ---- 3D STRUCTURE DATA TAB ----
 with tabs[2]:
-    st.header("3D Structure Data")
+    st.header("3D Structure Available Proteins")
     st.dataframe(df_3d, use_container_width=True, hide_index=True)
-    st.download_button("Download 3D Structure CSV", df_3d.to_csv(index=False), "3D_structure_data.csv", "text/csv")
+    st.download_button("Download 3D Structure Data", df_3d.to_csv(index=False), "3D_structure_data.csv", "text/csv")
 
-    st.subheader("No 3D Structure Data")
+    st.header("Proteins Without 3D Structure")
     st.dataframe(no_structure_df, use_container_width=True, hide_index=True)
-    st.download_button("Download No 3D Structure CSV", no_structure_df.to_csv(index=False), "No_3D_Structure.csv", "text/csv")
+    st.download_button("Download No 3D Structure Data", no_structure_df.to_csv(index=False), "No_3D_structure_data.csv", "text/csv")
 
 
 
@@ -299,7 +318,7 @@ with tabs[3]:  # 3D Visualizer tab
 
         if pdb_ids:
             molstar_url = "https://molstar.org/viewer/?url=" + ",".join([f"https://files.rcsb.org/download/{pdb}.pdb" for pdb in pdb_ids])
-            st.components.v1.iframe(molstar_url, width=1000, height=400)
+            st.components.v1.iframe(molstar_url, width=1000, height=600)
         else:
             st.warning("No valid PDB IDs found for visualization.")
 
@@ -307,6 +326,7 @@ with tabs[3]:  # 3D Visualizer tab
 
     # ---- AlphaFold 3D Viewer ----
     st.write("### 🧬 AlphaFold-based 3D Viewer (py3Dmol)")
+
 
     def fetch_alphafold_pdb(uniprot_id):
         """Fetch AlphaFold PDB file given a UniProt ID"""
@@ -323,12 +343,25 @@ with tabs[3]:  # 3D Visualizer tab
         uniprot_b_options = df_3d['UniProtID B'].dropna().unique().tolist()
         selected_uniprot_b = st.selectbox("🔍 Select UniProt ID B (AlphaFold)", options=[""] + uniprot_b_options, key="select_uniprot_b")
 
+
+
+
+
+
+
+
+
+
+
+
     if selected_uniprot_a and selected_uniprot_b:
         pdb_a = fetch_alphafold_pdb(selected_uniprot_a)
         pdb_b = fetch_alphafold_pdb(selected_uniprot_b)
 
+
         if pdb_a and pdb_b:
             st.subheader("🧪 AlphaFold 3D Viewer")
+
             viewer = py3Dmol.view(width=1000, height=600)
             viewer.addModel(pdb_a, "pdb")
             viewer.setStyle({'model': 0}, {'cartoon': {'color': 'salmon'}})
@@ -336,10 +369,13 @@ with tabs[3]:  # 3D Visualizer tab
             viewer.setStyle({'model': 1}, {'cartoon': {'color': 'skyblue'}})
             viewer.setBackgroundColor("white")
             viewer.zoomTo()
-            st.components.v1.html(viewer._make_html(), height=600)
+            st.components.v1.html(viewer._make_html(), height=300)
 
             # Download combined PDB
+
+
             combined_pdb = f"REMARK   Protein A: {selected_uniprot_a}\n{pdb_a}\nREMARK   Protein B: {selected_uniprot_b}\n{pdb_b}"
+
             st.subheader("💾 Download Combined Structure")
             st.download_button(
                 label="⬇️ Download Combined PDB",
@@ -388,44 +424,160 @@ with tabs[3]:  # 3D Visualizer tab
 
     st.markdown("---")
 
-     # ---- Upload PDB for Visualization ----
-    st.markdown("---")
+     # ---- Upload PDB file ----
     st.subheader("📦 Upload Predicted PDB File from AlphaFold")
-
-
     pdb_file = st.file_uploader("Upload PDB file", type=["pdb"], key="upload_pdb")
 
-
-
     if pdb_file:
-        pdb_bytes = pdb_file.read()
-        pdb_str = pdb_bytes.decode("utf-8", errors="replace")  # Handle encoding issues
-
-        st.success("✅ PDB uploaded. Rendering 3D structure...")
+        pdb_str = pdb_file.read().decode("utf-8", errors="replace")
+        st.success("✅ PDB uploaded successfully!")
 
         col1, col2 = st.columns([2, 1])
-
-
-
-
-
-
-
         with col1:
-            view = py3Dmol.view(width=700, height=500)
-            view.addModel(pdb_str, "pdb")
-            view.setStyle({'cartoon': {'color': 'spectrum'}})
-            view.zoomTo()
-            html = view._make_html()
-            st.components.v1.html(html, height=500)
+            st.markdown("### 📄 PDB File Preview")
+            st.text_area("PDB File Content", pdb_str, height=500)
+            st.download_button(
+                label="📥 Download PDB",
+                data=pdb_str,
+                file_name="uploaded_structure.pdb",
+                mime="chemical/x-pdb"
+            )
 
         with col2:
-            st.markdown("### 📄 PDB Content")
-            st.text_area("PDB File Content", pdb_str, height=500)
-            st.download_button("📥 Download PDB", pdb_bytes, file_name="structure.pdb", mime="chemical/x-pdb")
+            viewer = py3Dmol.view(width=400, height=300)
+            viewer.addModel(pdb_str, "pdb")
+            viewer.setStyle({'cartoon': {'color': 'spectrum'}})
+            viewer.setBackgroundColor("white")
+            viewer.zoomTo()
+            components.html(viewer._make_html(), height=350)
+
+# ---- DATA VISUALIZER TAB ----
+with tabs[4]:
+    st.header("Data Visualizer")
+
+    # Load Data
+    github_url = "https://raw.githubusercontent.com/MeghanaVaddella/Neurodegenerative_Database/refs/heads/main/my-cv-data.csv"
+    df = pd.read_csv(github_url)
+
+    # Filter for high-confidence interactions
+    high_conf = df[df['Combined Score'] > 0.85].copy()
+    high_conf = high_conf[['Protein A', 'Protein B', 'Combined Score']].dropna()
+
+    # Unique proteins list
+    all_proteins = pd.unique(pd.concat([high_conf['Protein A'], high_conf['Protein B']]))
+
+    # Select protein for heatmap
+    selected_protein = st.selectbox("Select a Protein A to visualize its interactions", sorted(all_proteins))
+
+    # Function to create horizontal heatmap
+    def create_horizontal_heatmap(protein):
+        interactions = high_conf[
+            (high_conf['Protein A'] == protein) | 
+            (high_conf['Protein B'] == protein)
+        ]
+        data = []
+        for _, row in interactions.iterrows():
+            partner = row['Protein B'] if row['Protein A'] == protein else row['Protein A']
+            data.append((protein, partner, row['Combined Score']))
+        interaction_df = pd.DataFrame(data, columns=['Protein A', 'Protein B', 'Score'])
+        pivot_df = interaction_df.pivot_table(
+            index='Protein A',
+            columns='Protein B',
+            values='Score',
+            aggfunc='max'
+        )
+        fig, ax = plt.subplots(figsize=(max(8, len(pivot_df.columns) * 0.6), 3))
+        sns.heatmap(
+            pivot_df,
+            annot=True,
+            cmap='rocket_r',
+            vmin=0.85,
+            vmax=1,
+            linewidths=0.5,
+            cbar_kws={'label': 'Interaction Confidence'},
+            annot_kws={'size': 9},
+            ax=ax
+        )
+        ax.set_title(f"High-Confidence Interactions for {protein}", pad=15)
+        ax.set_xlabel("Interaction Partners", labelpad=12)
+        ax.set_ylabel("Selected Protein", labelpad=12)
+        plt.xticks(rotation=45, ha='right')
+        plt.yticks(rotation=0)
+        st.pyplot(fig)
+
+    # Show heatmap
+    create_horizontal_heatmap(selected_protein)
+
+    # ---- Top Interacting Proteins ----
+    st.subheader("Top Proteins by Interaction Count & Combined Score")
+    protein_stats = (
+        pd.concat([df['Protein A'], df['Protein B']])
+        .value_counts()
+        .reset_index(name='Interaction Count')
+        .merge(
+            df.groupby('Protein A')['Combined Score'].mean().reset_index(),
+            left_on='index', right_on='Protein A', how='left'
+        )
+        .rename(columns={'Combined Score': 'Avg Combined Score'})
+        .head(20)
+    )
+    fig_bar = px.bar(
+        protein_stats,
+        x='Interaction Count',
+        y='index',
+        orientation='h',
+        color='Avg Combined Score',
+        color_continuous_scale='Viridis',
+        title="Top 20 Proteins: Interaction Count vs. Combined Score"
+    )
+    st.plotly_chart(fig_bar, use_container_width=True)
+
+    # ---- Disease-Specific Analysis ----
+    if 'Disease Associated' in df.columns:
+        st.subheader("Disease-Specific Analysis")
+        disease_counts = df['Disease Associated'].value_counts().reset_index()
+        disease_counts.columns = ['Disease Associated', 'count']
+        fig_pie = px.pie(
+            disease_counts,
+            names='Disease Associated',
+            values='count',
+            title="Distribution by Disease"
+        )
+        st.plotly_chart(fig_pie, use_container_width=True)
+
+        selected_disease = st.selectbox(
+            "Select Disease for Detailed Analysis",
+            df['Disease Associated'].dropna().unique()
+        )
+        filtered_data = df[df['Disease Associated'] == selected_disease]
+        st.write(f"Interactions associated with {selected_disease}:")
+        st.dataframe(filtered_data[['Protein A', 'Protein B', 'Experimental System', 'Pubmed ID']])
+
+    # ---- Experimental System Distribution ----
+    st.subheader("Experimental System Distribution")
+    exp_systems = df['Experimental System'].value_counts().reset_index()
+    exp_systems.columns = ['Experimental System', 'count']
+    fig_exp = px.bar(
+        exp_systems,
+        x='count',
+        y='Experimental System',
+        orientation='h',
+        title="Types of Experimental Evidence"
+    )
+    st.plotly_chart(fig_exp, use_container_width=True)
+
+    # ---- Combined Score Analysis ----
+    st.subheader("Combined Score Analysis")
+    fig_score = px.histogram(
+        df,
+        x='Combined Score',
+        nbins=50,
+        title="Distribution of Combined Confidence Scores"
+    )
+    st.plotly_chart(fig_score, use_container_width=True)
 
 # ---- GITHUB EDIT TAB ----
-with tabs[4]:
+with tabs[5]:
     st.header("🛠️ GitHub Edit Zone")
 
     st.markdown("""
@@ -444,4 +596,4 @@ with tabs[4]:
 
     st.markdown("""
     📢 **CHANGES IN THE GITHUB WILL BE REFLECTED IN THE APP WHEN THE PAGE IS RELOADED!!**
-    """) 
+    """)
