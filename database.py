@@ -244,7 +244,7 @@ with tabs[1]:
                 st.download_button("Download Network HTML", f, "ppi_network.html", "text/html")
         else:
             st.warning("PPI data is empty.")
-        
+
 # ---- 3D STRUCTURE DATA TAB ----
 with tabs[2]:
     st.header("3D Structure Available Proteins")
@@ -255,9 +255,6 @@ with tabs[2]:
     st.dataframe(no_structure_df, use_container_width=True, hide_index=True)
     st.download_button("Download No 3D Structure Data", no_structure_df.to_csv(index=False), "No_3D_structure_data.csv", "text/csv")
 
-import streamlit as st
-import requests
-import py3Dmol
 
 # ---- 3D VISUALIZER TAB ----
 with tabs[3]:  # 3D Visualizer tab
@@ -327,38 +324,27 @@ with tabs[3]:  # 3D Visualizer tab
     # ---- AlphaFold 3D Viewer ----
     st.write("### 🧬 AlphaFold-based 3D Viewer (py3Dmol)")
 
-    # Fetch AlphaFold PDB
     def fetch_alphafold_pdb(uniprot_id):
+        """Fetch AlphaFold PDB file given a UniProt ID"""
         url = f"https://alphafold.ebi.ac.uk/files/AF-{uniprot_id}-F1-model_v4.pdb"
         response = requests.get(url)
         return response.text if response.status_code == 200 else None
 
-    # Column layout for dropdowns
-    col1, col2 = st.columns(2)
+    col3, col4 = st.columns(2)
+    with col3:
+        uniprot_a_options = df_3d['UniProtID A'].dropna().unique().tolist()
+        selected_uniprot_a = st.selectbox("🔍 Select UniProt ID A (AlphaFold)", options=[""] + uniprot_a_options, key="select_uniprot_a")
 
-    # Dropdown A
-    with col1:
-        uniprot_a_options = sorted(df_3d['UniProtID A'].dropna().unique().tolist())
-        selected_uniprot_a = st.selectbox("🔍 Select Protein A (UniProt ID)", options=[""] + uniprot_a_options, key="select_uniprot_a")
+    with col4:
+        uniprot_b_options = df_3d['UniProtID B'].dropna().unique().tolist()
+        selected_uniprot_b = st.selectbox("🔍 Select UniProt ID B (AlphaFold)", options=[""] + uniprot_b_options, key="select_uniprot_b")
 
-    # Dropdown B depends on A
-    with col2:
-        if selected_uniprot_a:
-            filtered_df = df_3d[df_3d['UniProtID A'] == selected_uniprot_a]
-            uniprot_b_options = sorted(filtered_df['UniProtID B'].dropna().unique().tolist())
-            selected_uniprot_b = st.selectbox(f"🔍 Select Protein B interacting with {selected_uniprot_a}", options=[""] + uniprot_b_options, key="select_uniprot_b")
-        else:
-            selected_uniprot_b = None
-
-    # If both selected, fetch and visualize
     if selected_uniprot_a and selected_uniprot_b:
-        with st.spinner("🔄 Fetching AlphaFold structures..."):
-            pdb_a = fetch_alphafold_pdb(selected_uniprot_a)
-            pdb_b = fetch_alphafold_pdb(selected_uniprot_b)
+        pdb_a = fetch_alphafold_pdb(selected_uniprot_a)
+        pdb_b = fetch_alphafold_pdb(selected_uniprot_b)
 
         if pdb_a and pdb_b:
-            st.subheader("🧪 3D Interaction Viewer")
-
+            st.subheader("🧪 AlphaFold 3D Viewer")
             viewer = py3Dmol.view(width=1000, height=600)
             viewer.addModel(pdb_a, "pdb")
             viewer.setStyle({'model': 0}, {'cartoon': {'color': 'salmon'}})
@@ -366,21 +352,21 @@ with tabs[3]:  # 3D Visualizer tab
             viewer.setStyle({'model': 1}, {'cartoon': {'color': 'skyblue'}})
             viewer.setBackgroundColor("white")
             viewer.zoomTo()
+            st.components.v1.html(viewer._make_html(), height=300)
 
-            st.components.v1.html(viewer._make_html(), height=600)
-
-            # Prepare combined PDB
+            # Download combined PDB
             combined_pdb = f"REMARK   Protein A: {selected_uniprot_a}\n{pdb_a}\nREMARK   Protein B: {selected_uniprot_b}\n{pdb_b}"
-            
             st.subheader("💾 Download Combined Structure")
             st.download_button(
                 label="⬇️ Download Combined PDB",
                 data=combined_pdb,
-                file_name=f"{selected_uniprot_a}_{selected_uniprot_b}_AlphaFold_Complex.pdb",
+                file_name=f"{selected_uniprot_a}_{selected_uniprot_b}_combined.pdb",
                 mime="chemical/x-pdb"
             )
         else:
-            st.error("❌ Could not fetch one or both AlphaFold structures.")
+            st.error("❌ Failed to fetch one or both AlphaFold PDB files.")
+
+    st.markdown("---")
 
     # ---- AlphaFold-Multimer FASTA Generator ----
     st.write("### 🧬 Predict Interactions using AlphaFold-Multimer")
@@ -417,15 +403,15 @@ with tabs[3]:  # 3D Visualizer tab
             st.warning("⚠️ Please select both UniProt IDs for FASTA generation.")
 
     st.markdown("---")
-    
-    # ---- Upload PDB file ----
+
+     # ---- Upload PDB file ----
     st.subheader("📦 Upload Predicted PDB File from AlphaFold")
     pdb_file = st.file_uploader("Upload PDB file", type=["pdb"], key="upload_pdb")
 
     if pdb_file:
         pdb_str = pdb_file.read().decode("utf-8", errors="replace")
         st.success("✅ PDB uploaded successfully!")
-        
+
         col1, col2 = st.columns([2, 1])
         with col1:
             st.markdown("### 📄 PDB File Preview")
@@ -436,7 +422,7 @@ with tabs[3]:  # 3D Visualizer tab
                 file_name="uploaded_structure.pdb",
                 mime="chemical/x-pdb"
             )
-        
+
         with col2:
             viewer = py3Dmol.view(width=400, height=300)
             viewer.addModel(pdb_str, "pdb")
@@ -590,4 +576,4 @@ with tabs[5]:
 
     st.markdown("""
     📢 **CHANGES IN THE GITHUB WILL BE REFLECTED IN THE APP WHEN THE PAGE IS RELOADED!!**
-    """)   
+    """) 
