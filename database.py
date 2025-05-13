@@ -256,7 +256,6 @@ with tabs[2]:
     st.download_button("Download No 3D Structure Data", no_structure_df.to_csv(index=False), "No_3D_structure_data.csv", "text/csv")
 
 # ---- 3D VISUALIZER TAB ----
-# ---- 3D VISUALIZER TAB ----
 with tabs[3]:  # 3D Visualizer tab
     st.write("### 3D Protein Structure Visualizer")
 
