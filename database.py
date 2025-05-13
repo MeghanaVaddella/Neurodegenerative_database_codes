@@ -434,20 +434,152 @@ with tabs[3]:  # 3D Visualizer tab
 with tabs[4]:
     st.header("Data Visualizer")
 
-    st.subheader("Protein Interaction Count")
-    all_proteins = pd.concat([ppi_df['Protein A'], ppi_df['Protein B']])
-    protein_counts = all_proteins.value_counts().reset_index()
-    protein_counts.columns = ['Protein', 'Interaction Count']
+    # Load Data
+    github_url = "https://raw.githubusercontent.com/MeghanaVaddella/Neurodegenerative_Database/refs/heads/main/my-cv-data.csv"
+    df = pd.read_csv(github_url)
 
-    fig_bar = px.bar(protein_counts.head(20), x='Protein', y='Interaction Count',
-                     title="Top 20 Proteins by Interaction Count", color='Interaction Count')
+    # Filter for high-confidence interactions
+    high_conf = df[df['Combined Score'] > 0.85].copy()
+    high_conf = high_conf[['Protein A', 'Protein B', 'Combined Score']].dropna()
+
+    # Unique proteins list
+    all_proteins = pd.unique(pd.concat([high_conf['Protein A'], high_conf['Protein B']]))
+
+    # Select protein for heatmap
+    selected_protein = st.selectbox("Select a Protein A to visualize its interactions", sorted(all_proteins))
+
+    # Function to create horizontal heatmap
+    def create_horizontal_heatmap(protein):
+        interactions = high_conf[
+            (high_conf['Protein A'] == protein) | 
+            (high_conf['Protein B'] == protein)
+        ]
+        data = []
+        for _, row in interactions.iterrows():
+            partner = row['Protein B'] if row['Protein A'] == protein else row['Protein A']
+            data.append((protein, partner, row['Combined Score']))
+        interaction_df = pd.DataFrame(data, columns=['Protein A', 'Protein B', 'Score'])
+        pivot_df = interaction_df.pivot_table(
+            index='Protein A',
+            columns='Protein B',
+            values='Score',
+            aggfunc='max'
+        )
+        fig, ax = plt.subplots(figsize=(max(8, len(pivot_df.columns) * 0.6), 3))
+        sns.heatmap(
+            pivot_df,
+            annot=True,
+            cmap='rocket_r',
+            vmin=0.85,
+            vmax=1,
+            linewidths=0.5,
+            cbar_kws={'label': 'Interaction Confidence'},
+            annot_kws={'size': 9},
+            ax=ax
+        )
+        ax.set_title(f"High-Confidence Interactions for {protein}", pad=15)
+        ax.set_xlabel("Interaction Partners", labelpad=12)
+        ax.set_ylabel("Selected Protein", labelpad=12)
+        plt.xticks(rotation=45, ha='right')
+        plt.yticks(rotation=0)
+        st.pyplot(fig)
+
+    # Show heatmap
+    create_horizontal_heatmap(selected_protein)
+
+    # ---- Top Interacting Proteins ----
+    st.subheader("Top Proteins by Interaction Count & Combined Score")
+    protein_stats = (
+        pd.concat([df['Protein A'], df['Protein B']])
+        .value_counts()
+        .reset_index(name='Interaction Count')
+        .merge(
+            df.groupby('Protein A')['Combined Score'].mean().reset_index(),
+            left_on='index', right_on='Protein A', how='left'
+        )
+        .rename(columns={'Combined Score': 'Avg Combined Score'})
+        .head(20)
+    )
+    fig_bar = px.bar(
+        protein_stats,
+        x='Interaction Count',
+        y='index',
+        orientation='h',
+        color='Avg Combined Score',
+        color_continuous_scale='Viridis',
+        title="Top 20 Proteins: Interaction Count vs. Combined Score"
+    )
     st.plotly_chart(fig_bar, use_container_width=True)
 
-    st.subheader("Interaction Matrix Heatmap")
-    pivot = pd.crosstab(ppi_df['Protein A'], ppi_df['Protein B'])
-    fig, ax = plt.subplots(figsize=(12, 8))
-    sns.heatmap(pivot, cmap="coolwarm", linewidths=0.5, ax=ax)
-    st.pyplot(fig)
+    # ---- Interactive Network ----
+    st.subheader("Interactive PPI Network with Experimental Evidence")
+    G = nx.from_pandas_edgelist(
+        df,
+        source='Protein A',
+        target='Protein B',
+        edge_attr=['Experimental System', 'Combined Score', 'Pubmed ID', 'Author']
+    )
+    net = Network(height="800px", width="100%", notebook=False, bgcolor="white", font_color="black", select_menu=True, filter_menu=True)
+    for node in G.nodes():
+        net.add_node(node, title=node)
+    for edge in G.edges(data=True):
+        net.add_edge(
+            edge[0], edge[1],
+            title=f"""
+            Experimental System: {edge[2]['Experimental System']}<br>
+            PubMed ID: {edge[2]['Pubmed ID']}<br>
+            Author: {edge[2]['Author']}<br>
+            Combined Score: {edge[2]['Combined Score']}
+            """,
+            value=edge[2]['Combined Score']
+        )
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as tmpfile:
+        net.save_graph(tmpfile.name)
+        st.components.v1.html(open(tmpfile.name, 'r').read(), height=800)
+
+    # ---- Disease-Specific Analysis ----
+    if 'Disease Associated' in df.columns:
+        st.subheader("Disease-Specific Analysis")
+        disease_counts = df['Disease Associated'].value_counts().reset_index()
+        disease_counts.columns = ['Disease Associated', 'count']
+        fig_pie = px.pie(
+            disease_counts,
+            names='Disease Associated',
+            values='count',
+            title="Distribution by Disease"
+        )
+        st.plotly_chart(fig_pie, use_container_width=True)
+
+        selected_disease = st.selectbox(
+            "Select Disease for Detailed Analysis",
+            df['Disease Associated'].dropna().unique()
+        )
+        filtered_data = df[df['Disease Associated'] == selected_disease]
+        st.write(f"Interactions associated with {selected_disease}:")
+        st.dataframe(filtered_data[['Protein A', 'Protein B', 'Experimental System', 'Pubmed ID']])
+
+    # ---- Experimental System Distribution ----
+    st.subheader("Experimental System Distribution")
+    exp_systems = df['Experimental System'].value_counts().reset_index()
+    exp_systems.columns = ['Experimental System', 'count']
+    fig_exp = px.bar(
+        exp_systems,
+        x='count',
+        y='Experimental System',
+        orientation='h',
+        title="Types of Experimental Evidence"
+    )
+    st.plotly_chart(fig_exp, use_container_width=True)
+
+    # ---- Combined Score Analysis ----
+    st.subheader("Combined Score Analysis")
+    fig_score = px.histogram(
+        df,
+        x='Combined Score',
+        nbins=50,
+        title="Distribution of Combined Confidence Scores"
+    )
+    st.plotly_chart(fig_score, use_container_width=True)
 
 # ---- GITHUB EDIT TAB ----
 with tabs[5]:
