@@ -322,65 +322,47 @@ with tabs[3]:  # 3D Visualizer tab
     st.markdown("---")
 
     # ---- AlphaFold 3D Viewer ----
-    st.write("### 🧬 AlphaFold-based 3D Viewer (stmol + py3Dmol)")
-    
-    # Function to fetch AlphaFold PDB
-    def fetch_alphafold_pdb(uniprot_id):
-        url = f"https://alphafold.ebi.ac.uk/files/AF-{uniprot_id}-F1-model_v4.pdb"
-        response = requests.get(url)
-        return response.text if response.status_code == 200 else None
-    
-    # Sidebar selection from your DataFrame
-    col3, col4 = st.columns(2)
-    
-    with col3:
-        uniprot_a_options = df_3d['UniProtID A'].dropna().unique().tolist()
-        selected_uniprot_a = st.selectbox("🔍 Select UniProt ID A (AlphaFold)", options=[""] + uniprot_a_options, key="select_uniprot_a")
-    
-    with col4:
-        uniprot_b_options = df_3d['UniProtID B'].dropna().unique().tolist()
-        selected_uniprot_b = st.selectbox("🔍 Select UniProt ID B (AlphaFold)", options=[""] + uniprot_b_options, key="select_uniprot_b")
-    
-    # Visualization section
-    if selected_uniprot_a and selected_uniprot_b:
-        pdb_a = fetch_alphafold_pdb(selected_uniprot_a)
-        pdb_b = fetch_alphafold_pdb(selected_uniprot_b)
-    
-        if pdb_a and pdb_b:
-            st.subheader("🧪 AlphaFold 3D Viewer")
-    
-            # Combine models into one viewer
-            viewer = py3Dmol.view(width=1000, height=600)
-            viewer.addModel(pdb_a, "pdb")
-            viewer.setStyle({'model': 0}, {'cartoon': {'color': 'salmon'}})
-    
-            viewer.addModel(pdb_b, "pdb")
-            viewer.setStyle({'model': 1}, {'cartoon': {'color': 'skyblue'}})
-    
-            viewer.setBackgroundColor("white")
-            viewer.zoomTo()
-    
-            # Show viewer using stmol
-            showmol(viewer, height=600, width=1000)
-    
-            # Combined downloadable PDB file
-            combined_pdb = (
-                f"REMARK   Protein A: {selected_uniprot_a}\n{pdb_a}\n"
-                f"REMARK   Protein B: {selected_uniprot_b}\n{pdb_b}"
-            )
-    
-            st.subheader("💾 Download Combined Structure")
-            st.download_button(
-                label="⬇️ Download Combined PDB",
-                data=combined_pdb,
-                file_name=f"{selected_uniprot_a}_{selected_uniprot_b}_combined.pdb",
-                mime="chemical/x-pdb"
-            )
-    
-        else:
-            st.error("❌ Failed to fetch one or both AlphaFold PDB files.")
-    
-    st.markdown("---")
+    st.write("### 💾 Download AlphaFold Predicted Structures")
+
+# Function to fetch AlphaFold PDB
+def fetch_alphafold_pdb(uniprot_id):
+    url = f"https://alphafold.ebi.ac.uk/files/AF-{uniprot_id}-F1-model_v4.pdb"
+    response = requests.get(url)
+    return response.text if response.status_code == 200 else None
+
+# Protein selection
+col3, col4 = st.columns(2)
+
+with col3:
+    uniprot_a_options = df_3d['UniProtID A'].dropna().unique().tolist()
+    selected_uniprot_a = st.selectbox("🔍 Select UniProt ID A", options=[""] + uniprot_a_options, key="select_uniprot_a")
+
+with col4:
+    uniprot_b_options = df_3d['UniProtID B'].dropna().unique().tolist()
+    selected_uniprot_b = st.selectbox("🔍 Select UniProt ID B", options=[""] + uniprot_b_options, key="select_uniprot_b")
+
+# Download combined PDB file
+if selected_uniprot_a and selected_uniprot_b:
+    pdb_a = fetch_alphafold_pdb(selected_uniprot_a)
+    pdb_b = fetch_alphafold_pdb(selected_uniprot_b)
+
+    if pdb_a and pdb_b:
+        combined_pdb = (
+            f"REMARK   Protein A: {selected_uniprot_a}\n{pdb_a}\n"
+            f"REMARK   Protein B: {selected_uniprot_b}\n{pdb_b}"
+        )
+
+        st.subheader("⬇️ Download Combined AlphaFold Structure")
+        st.download_button(
+            label="Download PDB File",
+            data=combined_pdb,
+            file_name=f"{selected_uniprot_a}_{selected_uniprot_b}_combined.pdb",
+            mime="chemical/x-pdb"
+        )
+    else:
+        st.error("❌ Failed to fetch one or both AlphaFold PDB files.")
+
+st.markdown("---")
 
     # ---- AlphaFold-Multimer FASTA Generator ----
     st.write("### 🧬 Predict Interactions using AlphaFold-Multimer")
