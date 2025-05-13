@@ -421,32 +421,33 @@ if st.button("Generate AlphaFold-Multimer Input (FASTA)"):
 st.markdown("---")
 
 
-     # ---- Upload PDB file ----
-     st.subheader("📦 Upload Predicted PDB File from AlphaFold")
-     pdb_file = st.file_uploader("Upload PDB file", type=["pdb"], key="upload_pdb")
+# ---- Upload PDB file ----
+st.subheader("📦 Upload Predicted PDB File from AlphaFold")
+pdb_file = st.file_uploader("Upload PDB file", type=["pdb"], key="upload_pdb")
 
-    if pdb_file:
-        pdb_str = pdb_file.read().decode("utf-8", errors="replace")
-        st.success("✅ PDB uploaded successfully!")
+if pdb_file:
+    pdb_str = pdb_file.read().decode("utf-8", errors="replace")
+    st.success("✅ PDB uploaded successfully!")
 
-        col1, col2 = st.columns([2, 1])
-        with col1:
-            st.markdown("### 📄 PDB File Preview")
-            st.text_area("PDB File Content", pdb_str, height=500)
-            st.download_button(
-                label="📥 Download PDB",
-                data=pdb_str,
-                file_name="uploaded_structure.pdb",
-                mime="chemical/x-pdb"
-            )
+    col1, col2 = st.columns([2, 1])
 
-        with col2:
-            viewer = py3Dmol.view(width=400, height=300)
-            viewer.addModel(pdb_str, "pdb")
-            viewer.setStyle({'cartoon': {'color': 'spectrum'}})
-            viewer.setBackgroundColor("white")
-            viewer.zoomTo()
-            components.html(viewer._make_html(), height=350)
+    with col1:
+        st.markdown("### 📄 PDB File Preview")
+        st.text_area("PDB File Content", pdb_str, height=500)
+        st.download_button(
+            label="📥 Download PDB",
+            data=pdb_str,
+            file_name="uploaded_structure.pdb",
+            mime="chemical/x-pdb"
+        )
+
+    with col2:
+        viewer = py3Dmol.view(width=400, height=300)
+        viewer.addModel(pdb_str, "pdb")
+        viewer.setStyle({'cartoon': {'color': 'spectrum'}})
+        viewer.setBackgroundColor("white")
+        viewer.zoomTo()
+        components.html(viewer._make_html(), height=350)
 
 # ---- DATA VISUALIZER TAB ----
 with tabs[4]:
