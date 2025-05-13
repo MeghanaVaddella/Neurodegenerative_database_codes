@@ -367,7 +367,7 @@ st.markdown("---")
     # ---- AlphaFold-Multimer FASTA Generator ----
 st.write("### 🧬 Predict Interactions using AlphaFold-Multimer")
 
-  def fetch_sequence(uniprot_id):
+def fetch_sequence(uniprot_id):
         """Fetch protein sequence from UniProt"""
         url = f"https://rest.uniprot.org/uniprotkb/{uniprot_id}.fasta"
         response = requests.get(url)
