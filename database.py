@@ -365,7 +365,7 @@ if selected_uniprot_a and selected_uniprot_b:
 st.markdown("---")
 
     # ---- AlphaFold-Multimer FASTA Generator ----
-    st.write("### 🧬 Predict Interactions using AlphaFold-Multimer")
+st.write("### 🧬 Predict Interactions using AlphaFold-Multimer")
 
     def fetch_sequence(uniprot_id):
         """Fetch protein sequence from UniProt"""
