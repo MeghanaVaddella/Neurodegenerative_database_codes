@@ -595,3 +595,4 @@ with tabs[5]:
     st.markdown("""
     📢 **CHANGES IN THE GITHUB WILL BE REFLECTED IN THE APP WHEN THE PAGE IS RELOADED!!**
     """)
+
