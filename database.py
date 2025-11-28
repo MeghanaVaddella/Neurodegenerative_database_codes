@@ -6,172 +6,175 @@ from pyvis.network import Network
 import streamlit.components.v1 as components
 import py3Dmol
 import matplotlib.pyplot as plt
-import numpy as np
-import tempfile
-import plotly.express as px
 import seaborn as sns
-from stmol import showmol
+import plotly.express as px
+import plotly.graph_objects as go
+import tempfile
+import time
 
 # --- PAGE CONFIG ---
-st.set_page_config(page_title="NEUROGEN PPI", layout="wide")
+st.set_page_config(
+    page_title="NEUROGEN PPI",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
-# --- Inject MADEVoyager Font ---
-st.markdown("""
-    <style>
-    @font-face {
-        font-family: 'MADEVoyager';
-        src: url('https://raw.githubusercontent.com/MeghanaVaddella/Neurodegenerative_database_codes/main/MADEVoyagerPERSONAL_USE-Bold.otf') format('opentype');
-    }
-    </style>
-""", unsafe_allow_html=True)
+# --- THEME CONSTANTS ---
+BODY_BG = "#C4D8E2"
+HEADER_BG = "#3B5875"
+HEADER_TEXT = "#C4AEAD"
+TEXT_COLOR = "#001C3D"
 
-# --- Theme Colors (Dark Mode Palette) ---
-body_bg = "#C4D8E2"
-header_bg = "#3B5875"
-header_text_color = "#C4AEAD"
-general_text_color = "#001C3D"
-button_bg = "#36454F"
-button_text_color = "#DBE9F4"
-table_bg = "#36454F"
-table_border_color = "#5D8AA8"
-search_bg = "#A7C7E7"
-remaining_bg = "#8BA8B7"
-
-# --- Inject Custom Unified Styling ---
+# --- CUSTOM CSS ---
 st.markdown(f"""
     <style>
-    body, .stApp {{
-        background-color: {body_bg};
-        color: {general_text_color};
+    /* Global Styles */
+    .stApp {{
+        background-color: {BODY_BG};
+        color: {TEXT_COLOR};
+        font-family: 'Inter', sans-serif;
     }}
-    .block-container {{
-        background-color: {body_bg} !important;
-    }}
-    .header-text {{
-        background-color: {header_bg};
-        padding: 1.2rem;
-        font-family: 'MADEVoyager', sans-serif;
-        font-size: 58px;
+    
+    /* Header Styling */
+    .main-header {{
+        background-color: {HEADER_BG};
+        padding: 2rem;
         text-align: center;
-        margin-top: 0.5em;
-        margin-bottom: 0.3em;
-        color: {header_text_color};
-        letter-spacing: 2px;
-        border-radius: 12px;
-    }}
-    div[data-baseweb="tab-list"] {{
-        background-color: {body_bg} !important;
-        border-bottom: none !important;
-        padding-left: 1rem;
-    }}
-    button[data-baseweb="tab"] {{
-        background-color: {body_bg} !important;
-        color: {general_text_color} !important;
-        border: none !important;
+        color: #e2e8f0;
+        font-family: 'Georgia', serif;
+        font-size: 3rem;
         font-weight: bold;
-        font-size: 18px;
-        margin-right: 1.5rem;
-    }}
-    button[data-baseweb="tab"]:hover {{
-        color: #002B5B !important;
-        background-color: {body_bg} !important;
-        border: none !important;
-    }}
-    button[data-baseweb="tab"][aria-selected="true"] {{
-        border-bottom: 2px solid {general_text_color} !important;
-        font-weight: bold;
-    }}
-    .stButton button, button {{
-        background-color: {button_bg} !important;
-        color: {button_text_color} !important;
-        font-weight: bold;
-        border: none;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
         border-radius: 8px;
-        padding: 0.5rem 1rem;
     }}
-    .stTextInput > div > input,
-    .stSelectbox > div,
-    .stMultiSelect > div,
-    .stSlider > div,
-    .stNumberInput > div,
-    .stTextArea > div > textarea {{
-        background-color: {search_bg} !important;
-        color: {general_text_color} !important;
-        border: 1px solid {general_text_color} !important;
-        border-radius: 6px;
+
+    /* Tab Styling */
+    .stTabs [data-baseweb="tab-list"] {{
+        gap: 8px;
+        background-color: {HEADER_BG};
+        padding: 10px;
+        border-radius: 8px;
     }}
-    .stDataFrame, .data-box {{
-        background-color: {table_bg} !important;
-        color: {general_text_color} !important;
-        border-radius: 10px;
-        padding: 1rem;
-        border: 1px solid {table_border_color};
+    .stTabs [data-baseweb="tab"] {{
+        height: 50px;
+        white-space: pre-wrap;
+        background-color: transparent;
+        border-radius: 4px;
+        color: #e2e8f0;
+        font-weight: 600;
     }}
-    table {{
-        color: {general_text_color} !important;
-        background-color: {table_bg} !important;
-        border: 1px solid {table_border_color} !important;
+    .stTabs [aria-selected="true"] {{
+        background-color: {BODY_BG};
+        color: {TEXT_COLOR};
     }}
-    h1, h2, h3, h4, h5, h6 {{
-        color: {general_text_color} !important;
-        font-family: 'MADEVoyager', sans-serif;
+
+    /* Container/Card Styling */
+    .css-1r6slb0, .css-12oz5g7 {{
+        background-color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+    }}
+    
+    /* Home Bubble Styling */
+    .bubble-card {{
+        background-color: white;
+        padding: 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #f1f5f9;
+        margin-bottom: 2rem;
+        transition: transform 0.2s;
+    }}
+    .bubble-card:hover {{
+        transform: translateY(-2px);
+    }}
+    
+    /* Headings */
+    h1, h2, h3 {{
+        color: #1e3a8a !important;
+        font-family: 'Georgia', serif;
     }}
     </style>
 """, unsafe_allow_html=True)
 
-# --- Header ---
-st.markdown("<div class='header-text'>NEUROGEN PPI</div>", unsafe_allow_html=True)
+# --- HEADER ---
+st.markdown('<div class="main-header">NEUROGEN PPI</div>', unsafe_allow_html=True)
 
-# ---- LOAD DATA FUNCTIONS ----
+# --- RAW TEXT DATA ---
+HOME_TEXT_RAW = """
+PROTEIN-PROTEIN INTERACTIONS (PPI)
+What are Protein-Protein Interactions (PPIs) ?
+Protein-Protein Interactions (PPIs) refer to the physical contacts between two or more protein molecules. These interactions can be temporary (transient) or permanent (stable). They are fundamental for almost every biological process like forming protein complexes, signaling inside cells, immune responses, metabolism, and more. Proteins interact using specific binding sites through hydrogen bonds, ionic bonds, hydrophobic interactions, and van der Waals forces. PPIs are essential because they govern many biological processes including DNA replication, gene expression, metabolic pathways, immune responses, and programmed cell death (apoptosis). Disruption in these interactions can lead to diseases such as cancer, autoimmune disorders, and neurodegenerative conditions. Thus, understanding PPIs not only helps in understanding how life functions at the molecular level but also in identifying the causes of various diseases.
+
+Applications of the Protein-Protein Interactions
+1.Drug Discovery:
+Targeting PPIs enables the development of novel therapies, especially for diseases with previously undruggable targets such as cancer and viral infections. 
+2.Diagnostics:
+Abnormal PPI patterns serve as early biomarkers for detecting diseases before symptoms arise, improving diagnosis and treatment planning.
+3.Synthetic Biology:
+Engineered PPI networks are used to design programmable cells and synthetic pathways for use in medicine, agriculture, and bioengineering.
+4.Functional Genomics:
+PPI data helps predict the function of unknown proteins by analyzing their interaction partners within biological networks.
+5.Structural Biology:
+Studying PPIs reveals the architecture and dynamics of large protein complexes, offering insights into their mechanisms at the atomic level.
+6.Systems Biology and Target Validation:
+Mapping PPI networks allows researchers to model complex cellular systems and understand how proteins coordinate cellular processes and PPI analysis helps validate protein targets in drug development by confirming their role in disease-related pathways.
+    
+The database is about Alzheimer's Disease, Parkinson's Disease, Amyotrophic Lateral Sclerosis (ALS), Multiple Sclerosis (MS), Friedreich’s Ataxia (FA). It consists of about 3034 Protein-Protein Interactions involving the listed diseases. 
+  
+Here is some Information about the Diseases for which the PPIs are present in the database
+
+Alzheimer's Disease  
+Alzheimer's Disease is a neurodegenerative disorder characterized by progressive memory loss, cognitive decline, and behavioral changes. It is caused by genetic mutations, aging, beta-amyloid plaques, and Tau protein tangles. Symptoms include confusion, difficulty in problem-solving, and mood swings. The disease primarily affects the hippocampus and spreads to other brain regions, involving neurotransmitters like acetylcholine and proteins such as beta-amyloid and Tau. Diagnosis involves cognitive assessments, MRI, PET scans, and cerebrospinal fluid tests. Treatment includes cholinesterase inhibitors, memantine, cognitive therapy, and lifestyle adjustments. Preventive strategies involve physical exercise, a brain-healthy diet, social engagement, and cognitive training, but the disease ultimately leads to progressive cognitive decline, loss of independence, and is eventually fatal.  
+
+Parkinson's Disease  
+Parkinson's Disease primarily affects movement due to the degeneration of dopamine-producing neurons. It is associated with genetic predisposition, environmental toxins, and aging. Symptoms include tremors, rigidity, bradykinesia, and postural instability, as the disease targets the basal ganglia and substantia nigra. Dopamine and alpha-synuclein are key molecules involved in its pathology. Diagnosis is based on clinical symptoms and dopamine transporter scans. Treatment includes medications like levodopa, dopamine agonists, and deep brain stimulation, while lifestyle modifications such as regular exercise and a healthy diet help in management. The disease progressively impairs motor function, leading to difficulties in swallowing and, in advanced stages, dementia.  
+
+Amyotrophic Lateral Sclerosis (ALS)  
+ALS, also known as Lou Gehrig’s Disease, is a neurodegenerative condition affecting motor neurons, leading to muscle weakness and eventual paralysis. It is caused by genetic mutations, such as those in SOD1 and C9orf72, and environmental factors. Symptoms include muscle weakness, difficulty speaking and swallowing, and respiratory failure, as motor neurons in the brain and spinal cord deteriorate. Glutamate toxicity and SOD1 protein abnormalities play a role in the disease. Diagnosis is confirmed through electromyography (EMG) and genetic testing. Treatments like riluzole and edaravone, along with respiratory support, help manage symptoms, while physical therapy and assistive devices aid in mobility. ALS leads to progressive paralysis and significantly reduces life expectancy.  
+
+Multiple Sclerosis (MS)  
+MS is an autoimmune neurodegenerative disorder where the immune system attacks the myelin sheath of neurons, leading to symptoms such as fatigue, vision problems, muscle weakness, and coordination issues. It is associated with genetic factors, viral infections, and immune dysfunction, primarily affecting the brain and spinal cord. Key molecules involved include myelin proteins and inflammatory cytokines. Diagnosis involves MRI, lumbar puncture, and evoked potentials. Treatment consists of immunomodulatory drugs, corticosteroids, and physiotherapy. Lifestyle modifications, including a healthy diet and regular exercise, can help manage the condition. The disease progression varies, with periods of relapse and remission, and it can significantly impact daily life.  
+
+Friedreich’s Ataxia (FA)  
+Friedreich’s Ataxia is a rare inherited neurodegenerative disorder caused by mutations in the FXN gene, leading to reduced frataxin protein levels. It results in progressive damage to the nervous system, affecting movement and coordination. Symptoms include muscle weakness, ataxia, vision and hearing impairment, and scoliosis, as the disease primarily targets the spinal cord, peripheral nerves, and cerebellum. Diagnosis involves genetic testing, nerve conduction studies, and MRI. There is no cure, but treatments such as physical and speech therapy, along with supportive care, can help manage symptoms, while physical therapy and assistive devices aid in mobility. While there is no known prevention, maintaining mobility and heart health may slow progression. FA leads to progressive disability, an increased risk of heart disease, and a shortened lifespan.
+
+What does the database Have?
+
+1. The database presents the Protein-Protein Interactions Co-Expression, Experimentally Determined Interactions, Automated Textmining, Combined Score, Diseases Associated, BioGRID Interaction ID, Enterz Gene Interactor, BioGRID Interactor ID for Protein A and Protein B, Experimental System, Pubmed ID and the Author collected from STRING DATABASE, BIOGRID and IntACT.
+
+2. The 3D-Visualization of the Protein-Protein Interactions is done using the Uniprot ID's, PDB ID's of both Protein A and Protein B and are viewed in MolStar Viewer. The structure of the Protein-Protein Interactions are visualized by using the Uniprot ID's in Pymol-3D Viewer.
+
+3. The Protein Structure can be predicted using the AlphaFold-Multimer by generating the FASTA Sequences which help in generating the Protein Foldings of the Interaction using Google Colab having the AlphaFold2 in which the templates are generated using MMseq2. The Structures of the Protein Interactions can be be viewed in Chimera by downloading the PDB file from the 3D Visualizer: AlphaFold-based 3D Viewer (py3Dmol).
+
+Additionally, the data present can be downloaded and new Data can be added using the GitHub links present in the Github Edit Tab.
+"""
+
+# --- DATA LOADING ---
 @st.cache_data(show_spinner=False)
-def load_ppi_data():
-    url = "https://raw.githubusercontent.com/MeghanaVaddella/my-cv-dataset/refs/heads/main/my-cv-data.csv"
+def load_data():
     try:
-        return pd.read_csv(url)
+        ppi_df = pd.read_csv("https://raw.githubusercontent.com/MeghanaVaddella/Neurodegenerative_Database/refs/heads/main/my-cv-data.csv")
+        
+        df_3d_1 = pd.read_csv("https://raw.githubusercontent.com/MeghanaVaddella/Neurodegenerative_Database/refs/heads/main/3D%20Structure-1.csv")
+        df_3d_2 = pd.read_csv("https://raw.githubusercontent.com/MeghanaVaddella/Neurodegenerative_Database/refs/heads/main/3D%20Structure-2.csv")
+        df_3d = pd.concat([df_3d_1, df_3d_2], ignore_index=True)
+        
+        no_struct_df = pd.read_csv("https://raw.githubusercontent.com/MeghanaVaddella/Neurodegenerative_Database/refs/heads/main/No%203D%20Structure.csv")
+        
+        return ppi_df, df_3d, no_struct_df
     except Exception as e:
-        st.error(f"Error loading PPI data: {e}")
-        return pd.DataFrame()
+        st.error(f"Error loading data: {e}")
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
-@st.cache_data(show_spinner=False)
-def load_3d_data():
-    urls = [
-        "https://raw.githubusercontent.com/MeghanaVaddella/Neurodegenerative_Database/refs/heads/main/3D%20Structure-1.csv",
-        "https://raw.githubusercontent.com/MeghanaVaddella/Neurodegenerative_Database/refs/heads/main/3D%20Structure-2.csv"
-    ]
-    try:
-        dfs = [pd.read_csv(url) for url in urls]
-        return pd.concat(dfs, ignore_index=True)
-    except Exception as e:
-        st.error(f"Error loading 3D structure data: {e}")
-        return pd.DataFrame()
+ppi_df, df_3d, no_structure_df = load_data()
 
-@st.cache_data(show_spinner=False)
-def load_no_3d_data():
-    url = "https://raw.githubusercontent.com/MeghanaVaddella/Neurodegenerative_Database/refs/heads/main/No%203D%20Structure.csv"
-    try:
-        return pd.read_csv(url)
-    except Exception as e:
-        st.error(f"Error loading No 3D structure data: {e}")
-        return pd.DataFrame()
-
-@st.cache_data(show_spinner=False)
-def load_disease_data():
-    url = "https://raw.githubusercontent.com/MeghanaVaddella/Neurodegenerative_database_codes/refs/heads/main/disease%20data.txt"
-    try:
-        response = requests.get(url)
-        lines = response.text.splitlines()
-        return [line.strip() for line in lines if line.strip()][1:]
-    except Exception as e:
-        st.error(f"Error loading disease text: {e}")
-        return []
-
-# ---- LOAD ALL ----
-ppi_df = load_ppi_data()
-df_3d = load_3d_data()
-no_structure_df = load_no_3d_data()
-disease_text = load_disease_data()
-
-# ---- TABS ----
+# --- TABS ---
 tabs = st.tabs([
     "Home", 
     "Data", 
@@ -181,418 +184,502 @@ tabs = st.tabs([
     "GitHub Edit"
 ])
 
-# ---- HOME TAB ----
+# ================= HOME TAB =================
 with tabs[0]:
-    keywords = [
-        "Alzheimer's Disease", 
-        "Parkinson's Disease", 
-        "Amyotrophic Lateral Sclerosis (ALS)", 
-        "Multiple Sclerosis (MS)", 
+    # Custom text parser to create bubbles
+    lines = HOME_TEXT_RAW.strip().split('\n')
+    
+    current_bubble_content = []
+    
+    headers = [
+        "PROTEIN-PROTEIN INTERACTIONS (PPI)",
+        "Applications of the Protein-Protein Interactions",
+        "What does the database Have?",
+        "Here is some Information about the Diseases"
+    ]
+    
+    sub_headers = [
+        "What are Protein-Protein Interactions (PPIs) ?",
+        "Alzheimer's Disease", "Parkinson's Disease", 
+        "Amyotrophic Lateral Sclerosis (ALS)", "Multiple Sclerosis (MS)", 
         "Friedreich’s Ataxia (FA)"
     ]
+    
+    def render_bubble(content_lines):
+        if not content_lines: return
+        html_content = ""
+        for line in content_lines:
+            line = line.strip()
+            if not line: continue
+            
+            # Check for Main Headers
+            is_header = any(line.startswith(h) for h in headers)
+            if is_header:
+                html_content += f"<h2 style='color:#881337; font-size:32px; border-bottom:2px solid #88133720; padding-bottom:10px; margin-bottom:20px;'>{line}</h2>"
+                continue
+                
+            # Check for Sub Headers
+            is_sub = any(line.startswith(s) for s in sub_headers)
+            if is_sub:
+                html_content += f"<div style='color:#991b1b; font-size:24px; font-weight:bold; margin-top:20px; margin-bottom:10px; font-family:Georgia, serif;'>{line}</div>"
+                continue
+            
+            # Check for Lists
+            if line[0].isdigit() and ("." in line[:3]):
+                 html_content += f"<div style='color:#92400e; font-size:20px; font-weight:bold; margin-top:15px; margin-bottom:5px; font-family:serif;'>{line}</div>"
+                 continue
+                 
+            # Regular Text
+            html_content += f"<p style='color:#1f2937; font-size:18px; line-height:1.6; margin-bottom:10px;'>{line}</p>"
 
-    for paragraph in disease_text:
-        for keyword in keywords:
-            if keyword in paragraph:
-                paragraph = paragraph.replace(
-                    keyword, 
-                    f"<span style='color:#d62728; font-weight:bold; font-size:25px;'>{keyword}</span>"
-                )
+        st.markdown(f"<div class='bubble-card'>{html_content}</div>", unsafe_allow_html=True)
 
-        replacements = {
-            "PROTEIN-PROTEIN INTERACTIONS (PPI)": "<span style='font-weight:bold; color:#800020; font-size:30px;'>PROTEIN-PROTEIN INTERACTIONS (PPI)</span>",
-            "What are Protein-Protein Interactions (PPIs) ?": "<span style='font-weight:bold; color:#8B0000; font-size:30px;'>What are Protein-Protein Interactions (PPIs) ?</span>",
-            "Applications of the Protein-Protein Interactions": "<span style='font-weight:bold; color:#800020; font-size:30px;'>Applications of the Protein-Protein Interactions</span>",
-            "1.Drug Discovery:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>1.Drug Discovery:</span>",
-            "2.Diagnostics:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>2.Diagnostics:</span>",
-            "3.Synthetic Biology:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>3.Synthetic Biology:</span>",
-            "4.Functional Genomics:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>4.Functional Genomics:</span>",
-            "5.Structural Biology:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>5.Structural Biology:</span>",
-            "6.Systems Biology and Target Validation:": "<span style='font-weight:bold; color:#8B4513; font-size:25px;'>6.Systems Biology and Target Validation:</span>",
-            "What does the database Have?": "<span style='font-weight:bold; color:#800020; font-size:30px;'>What does the database Have?</span>",
-        }
+    # Logic to split text into blocks based on Main Headers
+    block_buffer = []
+    for line in lines:
+        if any(line.strip().startswith(h) for h in headers):
+            if block_buffer:
+                render_bubble(block_buffer)
+                block_buffer = []
+        block_buffer.append(line)
+    
+    if block_buffer:
+        render_bubble(block_buffer)
 
-        for old, new in replacements.items():
-            paragraph = paragraph.replace(old, new)
 
-        paragraph = f"<span style='font-size:20px;'>{paragraph}</span>"
-        st.markdown(paragraph, unsafe_allow_html=True)
-
-# ---- DATA TAB ----
+# ================= DATA TAB =================
 with tabs[1]:
-    st.header("Protein-Protein Interaction Data")
-    st.dataframe(ppi_df, use_container_width=True, hide_index=True)
-    st.download_button("Download PPI CSV", ppi_df.to_csv(index=False), "PPI_data.csv", "text/csv")
+    with st.container():
+        st.markdown("<div style='background-color:white; padding:20px; border-radius:10px;'>", unsafe_allow_html=True)
+        st.header("Protein-Protein Interaction Data")
+        
+        # Search functionality
+        search_term = st.text_input("Search Data", placeholder="Type to search...", key="ppi_search")
+        
+        display_df = ppi_df
+        if search_term:
+            display_df = ppi_df[ppi_df.astype(str).apply(lambda x: x.str.contains(search_term, case=False)).any(axis=1)]
+            
+        st.dataframe(display_df, use_container_width=True, hide_index=True)
+        st.download_button("Download PPI CSV", ppi_df.to_csv(index=False), "PPI_data.csv", "text/csv")
+        
+        st.markdown("---")
+        st.subheader("Visualize Interactions")
+        
+        # Interaction Graph Visualizer
+        all_proteins = pd.concat([ppi_df['Protein A'], ppi_df['Protein B']]).unique()
+        selected_protein = st.selectbox("Choose Protein", sorted(all_proteins), key="ppi_viz_select")
+        
+        if st.button("Generate Network Graph", key="gen_graph_btn"):
+            # Filter data for selected protein (Star Network)
+            subset = ppi_df[(ppi_df['Protein A'] == selected_protein) | (ppi_df['Protein B'] == selected_protein)]
+            
+            if not subset.empty:
+                net = Network(height="600px", width="100%", bgcolor="#ffffff", font_color="black")
+                
+                # Add central node
+                net.add_node(selected_protein, color="#dc2626", size=25, title=selected_protein)
+                
+                # Add neighbors
+                for _, row in subset.iterrows():
+                    partner = row['Protein B'] if row['Protein A'] == selected_protein else row['Protein A']
+                    score = row['Combined Score']
+                    net.add_node(partner, color="#3b82f6", size=15, title=f"{partner}\nScore: {score}")
+                    net.add_edge(selected_protein, partner, value=float(score) if isinstance(score, (int, float)) else 1)
+                
+                # Save and read
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as tmp:
+                    net.save_graph(tmp.name)
+                    with open(tmp.name, 'r', encoding='utf-8') as f:
+                        html_bytes = f.read()
+                        
+                components.html(html_bytes, height=620)
+                st.download_button("Download Network HTML", html_bytes, f"ppi_network_{selected_protein}.html", "text/html")
+            else:
+                st.warning("No interactions found for this protein.")
+        
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    st.subheader("Visualize Interactions")
-    selected_protein = st.selectbox("Choose Protein", pd.unique(ppi_df[['Protein A', 'Protein B']].values.ravel('K')))
 
-    def build_ppi_graph(protein, df):
-        G = nx.Graph()
-        edges = df[(df['Protein A'] == protein) | (df['Protein B'] == protein)]
-        for _, row in edges.iterrows():
-            G.add_edge(row['Protein A'], row['Protein B'])
-        net = Network(height="600px", width="100%", directed=False)
-        net.from_nx(G)
-        net.save_graph("ppi_graph.html")
-        return "ppi_graph.html"
-
-    if st.button("Show PPI Network"):
-        if not ppi_df.empty:
-            file_path = build_ppi_graph(selected_protein, ppi_df)
-            components.html(open(file_path, 'r').read(), height=600)
-            with open(file_path, "rb") as f:
-                st.download_button("Download Network HTML", f, "ppi_network.html", "text/html")
-        else:
-            st.warning("PPI data is empty.")
-
-# ---- 3D STRUCTURE DATA TAB ----
+# ================= 3D STRUCTURE DATA TAB =================
 with tabs[2]:
-    st.header("3D Structure Available Proteins")
-    st.dataframe(df_3d, use_container_width=True, hide_index=True)
-    st.download_button("Download 3D Structure Data", df_3d.to_csv(index=False), "3D_structure_data.csv", "text/csv")
+    with st.container():
+        st.markdown("<div style='background-color:white; padding:20px; border-radius:10px;'>", unsafe_allow_html=True)
+        
+        st.header("3D Structure Data")
+        search_3d = st.text_input("Search 3D Data", placeholder="Type to search...", key="3d_search")
+        
+        display_3d = df_3d
+        if search_3d:
+            display_3d = df_3d[df_3d.astype(str).apply(lambda x: x.str.contains(search_3d, case=False)).any(axis=1)]
+            
+        st.dataframe(display_3d, use_container_width=True, hide_index=True)
+        st.download_button("Download 3D Structure Data", df_3d.to_csv(index=False), "3D_structure_data.csv", "text/csv")
+        
+        st.markdown("---")
+        
+        st.subheader("Proteins Without 3D Structure")
+        st.dataframe(no_structure_df, use_container_width=True, hide_index=True)
+        st.download_button("Download No 3D Structure Data", no_structure_df.to_csv(index=False), "No_3D_structure_data.csv", "text/csv")
+        
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    st.header("Proteins Without 3D Structure")
-    st.dataframe(no_structure_df, use_container_width=True, hide_index=True)
-    st.download_button("Download No 3D Structure Data", no_structure_df.to_csv(index=False), "No_3D_structure_data.csv", "text/csv")
 
-# ---- 3D VISUALIZER TAB ----
-with tabs[3]:  # 3D Visualizer tab
-    st.write("### 3D Protein Structure Visualizer")
-
-    # MolStar Viewer using PDB IDs from dataset
-    if not df_3d.empty:
-        col1, col2 = st.columns(2)
-
-        with col1:
-            protein_a_options = df_3d['Protein A'].dropna().unique().tolist()
-            selected_protein_a = st.selectbox("🔍 Select Protein A", options=[""] + protein_a_options, key="select_protein_a")
-
-        with col2:
-            protein_b_options = df_3d['Protein B'].dropna().unique().tolist()
-            selected_protein_b = st.selectbox("🔍 Select Protein B", options=[""] + protein_b_options, key="select_protein_b")
-
-        result_col1, result_col2 = st.columns(2)
-        pdb_ids = []
-
-        # Visualize Protein A
-        if selected_protein_a:
-            protein_a_data = df_3d[df_3d['Protein A'] == selected_protein_a]
-            if not protein_a_data.empty:
-                row = protein_a_data.iloc[0]
-                with result_col1:
-                    st.write(f"**🧬 Protein A:** {row['Protein A']}")
-                    st.write(f"**UniProt ID A:** {row['UniProtID A']}")
-                    pdb_ids_a = row['PDB ID A'].split(", ")
-                    if pdb_ids_a[0] != "NA":
-                        pdb_links_a = " | ".join([f"[{pdb}](https://www.rcsb.org/structure/{pdb})" for pdb in pdb_ids_a])
-                        st.markdown(f"🔗 **PDB IDs A:** {pdb_links_a}", unsafe_allow_html=True)
-                        pdb_ids.extend(pdb_ids_a)
-            else:
-                with result_col1:
-                    st.warning("No matching Protein A found.")
-
-        # Visualize Protein B
-        if selected_protein_b:
-            protein_b_data = df_3d[df_3d['Protein B'] == selected_protein_b]
-            if not protein_b_data.empty:
-                row = protein_b_data.iloc[0]
-                with result_col2:
-                    st.write(f"**🧬 Protein B:** {row['Protein B']}")
-                    st.write(f"**UniProt ID B:** {row['UniProtID B']}")
-                    pdb_ids_b = row['PDB ID B'].split(", ")
-                    if pdb_ids_b[0] != "NA":
-                        pdb_links_b = " | ".join([f"[{pdb}](https://www.rcsb.org/structure/{pdb})" for pdb in pdb_ids_b])
-                        st.markdown(f"🔗 **PDB IDs B:** {pdb_links_b}", unsafe_allow_html=True)
-                        pdb_ids.extend(pdb_ids_b)
-            else:
-                with result_col2:
-                    st.warning("No matching Protein B found.")
-
-        # Mol* Viewer
-        st.write("### 🧬 Mol* (MolStar) Viewer")
-        pdb_ids = list(filter(lambda x: x != "NA", pdb_ids))
-
-        if pdb_ids:
-            molstar_url = "https://molstar.org/viewer/?url=" + ",".join([f"https://files.rcsb.org/download/{pdb}.pdb" for pdb in pdb_ids])
-            st.components.v1.iframe(molstar_url, width=1000, height=600)
-        else:
-            st.warning("No valid PDB IDs found for visualization.")
-
-    st.markdown("---")
-
-    # ---- AlphaFold 3D Viewer ----
-    st.write("### 💾 Download AlphaFold Predicted Structures")
-
-    # Function to fetch AlphaFold PDB
-    def fetch_alphafold_pdb(uniprot_id):
-        url = f"https://alphafold.ebi.ac.uk/files/AF-{uniprot_id}-F1-model_v4.pdb"
-        response = requests.get(url)
-        return response.text if response.status_code == 200 else None
-
-    # Protein selection
-    col3, col4 = st.columns(2)
-
-    with col3:
-        uniprot_a_options = df_3d['UniProtID A'].dropna().unique().tolist()
-        selected_uniprot_a = st.selectbox("🔍 Select UniProt ID A", options=[""] + uniprot_a_options, key="select_uniprot_a")
-
-    with col4:
-        uniprot_b_options = df_3d['UniProtID B'].dropna().unique().tolist()
-        selected_uniprot_b = st.selectbox("🔍 Select UniProt ID B", options=[""] + uniprot_b_options, key="select_uniprot_b")
-
-    # Download combined PDB file
-    if selected_uniprot_a and selected_uniprot_b:
-        pdb_a = fetch_alphafold_pdb(selected_uniprot_a)
-        pdb_b = fetch_alphafold_pdb(selected_uniprot_b)
-
-        if pdb_a and pdb_b:
-            combined_pdb = (
-                f"REMARK   Protein A: {selected_uniprot_a}\n{pdb_a}\n"
-                f"REMARK   Protein B: {selected_uniprot_b}\n{pdb_b}"
-            )
-
-            st.subheader("⬇️ Download Combined AlphaFold Structure")
-            st.download_button(
-                label="Download PDB File",
-                data=combined_pdb,
-                file_name=f"{selected_uniprot_a}_{selected_uniprot_b}_combined.pdb",
-                mime="chemical/x-pdb"
-            )
-        else:
-            st.error("❌ Failed to fetch one or both AlphaFold PDB files.")
-
-    st.markdown("---")
-
-    # ---- AlphaFold-Multimer FASTA Generator ----
-    st.write("### 🧬 Predict Interactions using AlphaFold-Multimer")
-
-    def fetch_sequence(uniprot_id):
-        """Fetch protein sequence from UniProt"""
-        url = f"https://rest.uniprot.org/uniprotkb/{uniprot_id}.fasta"
-        response = requests.get(url)
-        return response.text if response.ok else None
-
-    # Select UniProt IDs from dropdowns
-    fasta_col1, fasta_col2 = st.columns(2)
-
-    with fasta_col1:
-        fasta_uid1 = st.selectbox(
-            "🔍 Select UniProt ID for Protein A (FASTA)",
-            options=[""] + uniprot_a_options,
-            key="select_fasta_a"
+# ================= 3D VISUALIZER TAB =================
+with tabs[3]:
+    st.markdown("<div style='background-color:white; padding:20px; border-radius:10px;'>", unsafe_allow_html=True)
+    st.header("3D Protein Structure Visualizer")
+    
+    # --- Layout: Controls Left, Viewer Right ---
+    viz_col1, viz_col2 = st.columns([1, 2], gap="large")
+    
+    with viz_col1:
+        st.markdown("#### ⚙️ Controls")
+        
+        # Protein A
+        unique_prot_a = sorted(df_3d['Protein A'].dropna().unique())
+        sel_prot_a = st.selectbox("Select Protein A", [""] + unique_prot_a, key="viz_a")
+        
+        # Filter Protein B based on A
+        avail_prot_b = []
+        if sel_prot_a:
+            avail_prot_b = sorted(df_3d[df_3d['Protein A'] == sel_prot_a]['Protein B'].unique())
+        
+        sel_prot_b = st.selectbox(
+            "Select Protein B", 
+            [""] + avail_prot_b, 
+            key="viz_b", 
+            disabled=not sel_prot_a
         )
+        
+        # Metadata Display
+        if sel_prot_a:
+            row_a = df_3d[df_3d['Protein A'] == sel_prot_a].iloc[0]
+            st.info(f"**Protein A**: {row_a['Protein A']}\n\n**UniProt**: {row_a['UniProtID A']}\n\n**PDBs**: {row_a['PDB ID A']}")
+            
+        if sel_prot_b:
+            row_b = df_3d[(df_3d['Protein A'] == sel_prot_a) & (df_3d['Protein B'] == sel_prot_b)].iloc[0]
+            st.warning(f"**Protein B**: {row_b['Protein B']}\n\n**UniProt**: {row_b['UniProtID B']}\n\n**PDBs**: {row_b['PDB ID B']}")
 
-    with fasta_col2:
-        fasta_uid2 = st.selectbox(
-            "🔍 Select UniProt ID for Protein B (FASTA)",
-            options=[""] + uniprot_b_options,
-            key="select_fasta_b"
-        )
+    with viz_col2:
+        # 3D Viewer Logic
+        viewer_height = 500
+        view = py3Dmol.view(height=viewer_height, width="100%")
+        view.setBackgroundColor('white')
+        
+        has_model = False
+        
+        if sel_prot_a:
+            row_a = df_3d[df_3d['Protein A'] == sel_prot_a].iloc[0]
+            pdbs_a = [p.strip() for p in str(row_a['PDB ID A']).split(',') if p.strip() != 'NA']
+            if pdbs_a:
+                view.addModel(f"pdb:{pdbs_a[0]}", 'pdb') # Load from RCSB
+                view.setStyle({'model': -1}, {'cartoon': {'color': 'blue'}})
+                has_model = True
+        
+        if sel_prot_b:
+            row_b = df_3d[(df_3d['Protein A'] == sel_prot_a) & (df_3d['Protein B'] == sel_prot_b)].iloc[0]
+            pdbs_b = [p.strip() for p in str(row_b['PDB ID B']).split(',') if p.strip() != 'NA']
+            if pdbs_b:
+                view.addModel(f"pdb:{pdbs_b[0]}", 'pdb') # Load from RCSB
+                view.setStyle({'model': -1}, {'cartoon': {'color': 'orange'}})
+                has_model = True
 
-    # Generate FASTA on button click
-    if st.button("Generate AlphaFold-Multimer Input (FASTA)"):
-        if fasta_uid1 and fasta_uid2:
-            seq1 = fetch_sequence(fasta_uid1)
-            seq2 = fetch_sequence(fasta_uid2)
-
-            if seq1 and seq2:
-                combined_fasta = f"{seq1.strip()}\n{seq2.strip()}"
-                st.success("✅ FASTA file generated successfully.")
-                st.download_button(
-                    "⬇️ Download FASTA",
-                    data=combined_fasta,
-                    file_name="multimer_input.fasta",
-                    mime="text/plain"
-                )
-                st.code(combined_fasta)
-
-                # ColabFold link
-                colab_link = "https://colab.research.google.com/github/sokrypton/ColabFold/blob/main/AlphaFold2.ipynb"
-                st.markdown(
-                    f"🔗 **[Open AlphaFold-Multimer in Google Colab]({colab_link})**",
-                    unsafe_allow_html=True
-                )
-            else:
-                st.error("❌ Error fetching sequences. Check UniProt IDs.")
+        if has_model:
+            view.zoomTo()
         else:
-            st.warning("⚠️ Please select both UniProt IDs for FASTA generation.")
+            # Placeholder text via style since py3Dmol is canvas
+            pass 
+            
+        html_view = view._make_html()
+        components.html(html_view, height=viewer_height + 20)
+
+    st.markdown("---")
+    
+    # --- AlphaFold Download ---
+    st.subheader("💾 Download AlphaFold Predicted Structures")
+    
+    af_col1, af_col2 = st.columns(2)
+    with af_col1:
+        uniprot_opts_a = sorted(df_3d['UniProtID A'].dropna().unique())
+        af_uni_a = st.selectbox("Select UniProt ID A (AF)", [""] + uniprot_opts_a, key="af_a")
+    
+    with af_col2:
+        af_uni_b_opts = []
+        if af_uni_a:
+            af_uni_b_opts = sorted(df_3d[df_3d['UniProtID A'] == af_uni_a]['UniProtID B'].unique())
+        af_uni_b = st.selectbox("Select UniProt ID B (AF)", [""] + af_uni_b_opts, key="af_b", disabled=not af_uni_a)
+        
+    if st.button("Fetch & Download AlphaFold PDBs"):
+        if af_uni_a and af_uni_b:
+            def get_af_pdb(uid):
+                # Try v4, then v3
+                for v in [4, 3, 2, 1]:
+                    url = f"https://alphafold.ebi.ac.uk/files/AF-{uid}-F1-model_v{v}.pdb"
+                    r = requests.get(url)
+                    if r.status_code == 200: return r.text
+                return None
+            
+            with st.spinner("Fetching AlphaFold structures..."):
+                pdb_a_txt = get_af_pdb(af_uni_a)
+                pdb_b_txt = get_af_pdb(af_uni_b)
+                
+                if pdb_a_txt and pdb_b_txt:
+                    combined = f"REMARK Protein A: {af_uni_a}\n{pdb_a_txt}\nTER\nREMARK Protein B: {af_uni_b}\n{pdb_b_txt}\nEND"
+                    st.download_button(
+                        label="Download Combined PDB",
+                        data=combined,
+                        file_name=f"AF_{af_uni_a}_{af_uni_b}.pdb",
+                        mime="chemical/x-pdb"
+                    )
+                    st.success("Ready for download!")
+                else:
+                    st.error("Could not find AlphaFold entries for one or both proteins.")
+        else:
+            st.warning("Select both UniProt IDs first.")
+            
+    st.markdown("---")
+
+    # --- FASTA Generator ---
+    st.subheader("🧬 Predict Interactions using AlphaFold-Multimer")
+    
+    fa_col1, fa_col2 = st.columns(2)
+    with fa_col1:
+        fa_uni_a = st.selectbox("UniProt ID A (FASTA)", [""] + uniprot_opts_a, key="fa_a")
+    with fa_col2:
+        fa_uni_b_opts = []
+        if fa_uni_a:
+             fa_uni_b_opts = sorted(df_3d[df_3d['UniProtID A'] == fa_uni_a]['UniProtID B'].unique())
+        fa_uni_b = st.selectbox("UniProt ID B (FASTA)", [""] + fa_uni_b_opts, key="fa_b", disabled=not fa_uni_a)
+
+    if st.button("Generate FASTA"):
+        if fa_uni_a and fa_uni_b:
+            def get_fasta(uid):
+                r = requests.get(f"https://rest.uniprot.org/uniprotkb/{uid}.fasta")
+                return r.text if r.ok else ""
+            
+            f1 = get_fasta(fa_uni_a)
+            f2 = get_fasta(fa_uni_b)
+            
+            if f1 and f2:
+                combined_fasta = f"{f1}\n{f2}"
+                st.download_button("Download FASTA", combined_fasta, "multimer.fasta", "text/plain")
+                st.markdown("[Open ColabFold](https://colab.research.google.com/github/sokrypton/ColabFold/blob/main/AlphaFold2.ipynb)")
+            else:
+                st.error("Failed to fetch sequences.")
 
     st.markdown("---")
 
-    # ---- Upload PDB file (VISIBLE ONLY IN THIS TAB) ----
-    st.subheader("📦 Upload Predicted PDB File from AlphaFold")
-    pdb_file = st.file_uploader("Upload PDB file", type=["pdb"], key="upload_pdb")
-
-    if pdb_file:
-        pdb_str = pdb_file.read().decode("utf-8", errors="replace")
-        st.success("✅ PDB uploaded successfully!")
-
-        col1, col2 = st.columns([2, 1])
-
-        with col1:
-            st.markdown("### 📄 PDB File Preview")
-            st.text_area("PDB File Content", pdb_str, height=500)
-            st.download_button(
-                label="📥 Download PDB",
-                data=pdb_str,
-                file_name="uploaded_structure.pdb",
-                mime="chemical/x-pdb"
-            )
-
-        with col2:
-            viewer = py3Dmol.view(width=400, height=300)
-            viewer.addModel(pdb_str, "pdb")
-            viewer.setStyle({'cartoon': {'color': 'spectrum'}})
-            viewer.setBackgroundColor("white")
-            viewer.zoomTo()
-            components.html(viewer._make_html(), height=350)
+    # --- PDB Upload ---
+    st.subheader("📦 Upload Predicted PDB File")
+    uploaded_file = st.file_uploader("Upload PDB", type=['pdb'])
+    if uploaded_file:
+        pdb_content = uploaded_file.read().decode("utf-8")
+        view_up = py3Dmol.view(width=800, height=500)
+        view_up.addModel(pdb_content, "pdb")
+        view_up.setStyle({'cartoon': {'color': 'spectrum'}})
+        view_up.zoomTo()
+        view_up.setBackgroundColor('white')
+        components.html(view_up._make_html(), height=500)
+        
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
-# ---- DATA VISUALIZER TAB ----
+# ================= DATA VISUALIZER TAB =================
 with tabs[4]:
-    st.header("Data Visualizer")
+    # Layout: Top Row (Heatmaps Left, Network Right)
+    
+    # 1. Top Section Container
+    with st.container():
+        # Using columns to create the layout: 1/3 width for Heatmaps, 2/3 width for Network
+        top_left, top_right = st.columns([1, 2], gap="medium")
+        
+        # --- LEFT COLUMN: HEATMAPS ---
+        with top_left:
+            st.markdown("<div style='background-color:white; padding:15px; border-radius:10px; margin-bottom:20px; border:1px solid #e5e7eb;'>", unsafe_allow_html=True)
+            st.markdown("### 🧬 Interactive Matrix")
+            
+            # Interactive Matrix Logic (Simulated with multiselect)
+            all_prots = sorted(pd.concat([ppi_df['Protein A'], ppi_df['Protein B']]).unique())
+            default_prots = all_prots[:5]
+            selected_heatmap_prots = st.multiselect("Add Proteins", all_prots, default=default_prots, key="hm_multi")
+            
+            if selected_heatmap_prots:
+                # Build adjacency matrix
+                hm_data = pd.DataFrame(index=selected_heatmap_prots, columns=selected_heatmap_prots).fillna(0)
+                for p1 in selected_heatmap_prots:
+                    for p2 in selected_heatmap_prots:
+                        if p1 == p2:
+                            hm_data.loc[p1, p2] = 1000 # Max score for self
+                        else:
+                            match = ppi_df[((ppi_df['Protein A'] == p1) & (ppi_df['Protein B'] == p2)) | 
+                                           ((ppi_df['Protein B'] == p1) & (ppi_df['Protein A'] == p2))]
+                            if not match.empty:
+                                val = match.iloc[0]['Combined Score']
+                                hm_data.loc[p1, p2] = float(val) * 1000 if float(val) <= 1 else float(val)
 
-    # Load Data
-    github_url = "https://raw.githubusercontent.com/MeghanaVaddella/Neurodegenerative_Database/refs/heads/main/my-cv-data.csv"
-    df = pd.read_csv(github_url)
+                fig_hm, ax_hm = plt.subplots(figsize=(5, 4))
+                sns.heatmap(hm_data.astype(float), cmap="rocket_r", ax=ax_hm, cbar=False, annot=False)
+                st.pyplot(fig_hm)
+            st.markdown("</div>", unsafe_allow_html=True)
 
-    # Filter for high-confidence interactions
-    high_conf = df[df['Combined Score'] > 0.85].copy()
-    high_conf = high_conf[['Protein A', 'Protein B', 'Combined Score']].dropna()
+            st.markdown("<div style='background-color:white; padding:15px; border-radius:10px; border:1px solid #e5e7eb;'>", unsafe_allow_html=True)
+            st.markdown("### 🔥 High-Conf. (>0.85)")
+            
+            # Filter High Confidence > 0.85 (assuming 0-1 scale or 0-1000 scale)
+            # Normalize score column first
+            temp_df = ppi_df.copy()
+            # Handle mixed types or scaling
+            def clean_score(x):
+                try:
+                    v = float(x)
+                    return v if v > 1 else v * 1000
+                except:
+                    return 0
+            
+            temp_df['score_norm'] = temp_df['Combined Score'].apply(clean_score)
+            high_conf_df = temp_df[temp_df['score_norm'] > 850]
+            
+            hc_prots = sorted(pd.concat([high_conf_df['Protein A'], high_conf_df['Protein B']]).unique())
+            
+            if hc_prots:
+                sel_hc_prot = st.selectbox("Select Protein", hc_prots, key="hc_sel")
+                
+                # Show neighbors heatmap
+                subset_hc = high_conf_df[(high_conf_df['Protein A'] == sel_hc_prot) | (high_conf_df['Protein B'] == sel_hc_prot)]
+                
+                if not subset_hc.empty:
+                    partners = []
+                    scores = []
+                    for _, r in subset_hc.iterrows():
+                        p = r['Protein B'] if r['Protein A'] == sel_hc_prot else r['Protein A']
+                        partners.append(p)
+                        scores.append(r['score_norm'])
+                    
+                    hc_viz_df = pd.DataFrame({'Partner': partners, 'Score': scores}).set_index('Partner').sort_values('Score', ascending=False)
+                    
+                    fig_hc, ax_hc = plt.subplots(figsize=(5, len(partners)*0.3 + 1))
+                    sns.heatmap(hc_viz_df, cmap="rocket_r", annot=True, cbar=False, ax=ax_hc)
+                    st.pyplot(fig_hc)
+                else:
+                    st.write("No interactions > 0.85")
+            else:
+                st.write("No high confidence data available.")
+            st.markdown("</div>", unsafe_allow_html=True)
 
-    # Unique proteins list
-    all_proteins = pd.unique(pd.concat([high_conf['Protein A'], high_conf['Protein B']]))
+        # --- RIGHT COLUMN: DISEASE NETWORK ---
+        with top_right:
+            st.markdown("<div style='background-color:white; padding:20px; border-radius:10px; height:100%; border:1px solid #e5e7eb;'>", unsafe_allow_html=True)
+            st.markdown("### 🕸️ Disease Interaction Network")
+            
+            diseases = [
+                "Alzheimer's Disease", "Parkinson's Disease", 
+                "Amyotrophic Lateral Sclerosis (ALS)", "Multiple Sclerosis (MS)", 
+                "Friedreich’s Ataxia (FA)"
+            ]
+            
+            sel_disease = st.selectbox("Select Disease", diseases, key="net_dis_sel")
+            
+            if st.button("Simulate Network", key="sim_net"):
+                # Filter by disease
+                dis_df = ppi_df[ppi_df['Disease Associated'].astype(str).str.contains(sel_disease, regex=False, na=False)]
+                
+                if not dis_df.empty:
+                    # Filter for hubs (Top 30 by degree)
+                    G = nx.from_pandas_edgelist(dis_df, 'Protein A', 'Protein B', ['Combined Score'])
+                    degrees = dict(G.degree)
+                    top_nodes = sorted(degrees, key=degrees.get, reverse=True)[:30]
+                    H = G.subgraph(top_nodes)
+                    
+                    net_viz = Network(height="500px", width="100%", bgcolor="#ffffff", font_color="black")
+                    net_viz.from_nx(H)
+                    
+                    # Custom physics/options
+                    net_viz.set_options("""
+                    var options = {
+                      "nodes": {
+                        "color": {
+                          "background": "#3b82f6",
+                          "border": "white"
+                        },
+                        "font": {
+                          "size": 14,
+                          "face": "tahoma"
+                        }
+                      },
+                      "edges": {
+                        "color": {
+                          "inherit": true
+                        },
+                        "smooth": false
+                      },
+                      "physics": {
+                        "forceAtlas2Based": {
+                          "gravitationalConstant": -50,
+                          "centralGravity": 0.01,
+                          "springLength": 100,
+                          "springConstant": 0.08
+                        },
+                        "minVelocity": 0.75,
+                        "solver": "forceAtlas2Based"
+                      }
+                    }
+                    """)
+                    
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as tmp_net:
+                        net_viz.save_graph(tmp_net.name)
+                        with open(tmp_net.name, 'r', encoding='utf-8') as f:
+                            net_html = f.read()
+                    
+                    components.html(net_html, height=520)
+                else:
+                    st.warning("No interactions found for this disease.")
+            else:
+                st.info("Click 'Simulate Network' to generate the graph.")
+            
+            st.markdown("</div>", unsafe_allow_html=True)
 
-    # Select protein for heatmap
-    selected_protein = st.selectbox("Select a Protein A to visualize its interactions", sorted(all_proteins))
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    # Function to create horizontal heatmap
-    def create_horizontal_heatmap(protein):
-        interactions = high_conf[
-            (high_conf['Protein A'] == protein) | 
-            (high_conf['Protein B'] == protein)
-        ]
-        data = []
-        for _, row in interactions.iterrows():
-            partner = row['Protein B'] if row['Protein A'] == protein else row['Protein A']
-            data.append((protein, partner, row['Combined Score']))
-        interaction_df = pd.DataFrame(data, columns=['Protein A', 'Protein B', 'Score'])
-        pivot_df = interaction_df.pivot_table(
-            index='Protein A',
-            columns='Protein B',
-            values='Score',
-            aggfunc='max'
-        )
-        fig, ax = plt.subplots(figsize=(max(8, len(pivot_df.columns) * 0.6), 3))
-        sns.heatmap(
-            pivot_df,
-            annot=True,
-            cmap='rocket_r',
-            vmin=0.85,
-            vmax=1,
-            linewidths=0.5,
-            cbar_kws={'label': 'Interaction Confidence'},
-            annot_kws={'size': 9},
-            ax=ax
-        )
-        ax.set_title(f"High-Confidence Interactions for {protein}", pad=15)
-        ax.set_xlabel("Interaction Partners", labelpad=12)
-        ax.set_ylabel("Selected Protein", labelpad=12)
-        plt.xticks(rotation=45, ha='right')
-        plt.yticks(rotation=0)
-        st.pyplot(fig)
+    # 2. Bottom Section: Charts
+    with st.container():
+        chart_c1, chart_c2 = st.columns(2)
+        
+        with chart_c1:
+            st.markdown("<div style='background-color:white; padding:15px; border-radius:10px;'>", unsafe_allow_html=True)
+            st.markdown("#### Distribution by Disease")
+            if 'Disease Associated' in ppi_df.columns:
+                dis_counts = ppi_df['Disease Associated'].value_counts().reset_index()
+                dis_counts.columns = ['Disease', 'Count']
+                fig_pie = px.pie(dis_counts, names='Disease', values='Count', color_discrete_sequence=px.colors.qualitative.Pastel)
+                st.plotly_chart(fig_pie, use_container_width=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+            
+        with chart_c2:
+            st.markdown("<div style='background-color:white; padding:15px; border-radius:10px;'>", unsafe_allow_html=True)
+            st.markdown("#### Experimental Systems")
+            if 'Experimental System' in ppi_df.columns:
+                exp_counts = ppi_df['Experimental System'].value_counts().reset_index()
+                exp_counts.columns = ['System', 'Count']
+                fig_bar = px.bar(exp_counts, x='Count', y='System', orientation='h', color='Count', color_continuous_scale='Blues')
+                st.plotly_chart(fig_bar, use_container_width=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
-    # Show heatmap
-    create_horizontal_heatmap(selected_protein)
 
-    # ---- Top Interacting Proteins ----
-    st.subheader("Top Proteins by Interaction Count & Combined Score")
-    protein_stats = (
-        pd.concat([df['Protein A'], df['Protein B']])
-        .value_counts()
-        .reset_index(name='Interaction Count')
-        .merge(
-            df.groupby('Protein A')['Combined Score'].mean().reset_index(),
-            left_on='index', right_on='Protein A', how='left'
-        )
-        .rename(columns={'Combined Score': 'Avg Combined Score'})
-        .head(20)
-    )
-    fig_bar = px.bar(
-        protein_stats,
-        x='Interaction Count',
-        y='index',
-        orientation='h',
-        color='Avg Combined Score',
-        color_continuous_scale='Viridis',
-        title="Top 20 Proteins: Interaction Count vs. Combined Score"
-    )
-    st.plotly_chart(fig_bar, use_container_width=True)
-
-    # ---- Disease-Specific Analysis ----
-    if 'Disease Associated' in df.columns:
-        st.subheader("Disease-Specific Analysis")
-        disease_counts = df['Disease Associated'].value_counts().reset_index()
-        disease_counts.columns = ['Disease Associated', 'count']
-        fig_pie = px.pie(
-            disease_counts,
-            names='Disease Associated',
-            values='count',
-            title="Distribution by Disease"
-        )
-        st.plotly_chart(fig_pie, use_container_width=True)
-
-        selected_disease = st.selectbox(
-            "Select Disease for Detailed Analysis",
-            df['Disease Associated'].dropna().unique()
-        )
-        filtered_data = df[df['Disease Associated'] == selected_disease]
-        st.write(f"Interactions associated with {selected_disease}:")
-        st.dataframe(filtered_data[['Protein A', 'Protein B', 'Experimental System', 'Pubmed ID']])
-
-    # ---- Experimental System Distribution ----
-    st.subheader("Experimental System Distribution")
-    exp_systems = df['Experimental System'].value_counts().reset_index()
-    exp_systems.columns = ['Experimental System', 'count']
-    fig_exp = px.bar(
-        exp_systems,
-        x='count',
-        y='Experimental System',
-        orientation='h',
-        title="Types of Experimental Evidence"
-    )
-    st.plotly_chart(fig_exp, use_container_width=True)
-
-    # ---- Combined Score Analysis ----
-    st.subheader("Combined Score Analysis")
-    fig_score = px.histogram(
-        df,
-        x='Combined Score',
-        nbins=50,
-        title="Distribution of Combined Confidence Scores"
-    )
-    st.plotly_chart(fig_score, use_container_width=True)
-
-# ---- GITHUB EDIT TAB ----
+# ================= GITHUB EDIT TAB =================
 with tabs[5]:
-    st.header("🛠️ GitHub Edit Zone")
-
-    st.markdown("""
-      USE THIS SECTION TO ACCESS AND EDIT THE DATASETS DIRECTLY FROM THE GITHUB
-    """) 
-
-    github_links = {
+    st.markdown("<div style='background-color:white; padding:40px; border-radius:10px; text-align:center;'>", unsafe_allow_html=True)
+    st.header("GitHub Repository")
+    st.write("Access and edit the datasets directly on GitHub. Changes made to the CSV files in the repository will be automatically reflected here upon reloading the application.")
+    
+    links = {
         "PPI Data (CSV)": "https://github.com/MeghanaVaddella/my-cv-dataset/blob/main/my-cv-data.csv",
-        "3D Structure Data 1": "https://github.com/MeghanaVaddella/Neurodegenerative_Database/blob/main/3D%20Structure-1.csv",
-        "3D Structure Data 2": "https://github.com/MeghanaVaddella/Neurodegenerative_Database/blob/main/3D%20Structure-2.csv",
-        "No 3D Structure (CSV)": "https://github.com/MeghanaVaddella/Neurodegenerative_Database/blob/main/No%203D%20Structure.csv"
+        "3D Structure Part 1": "https://github.com/MeghanaVaddella/Neurodegenerative_Database/blob/main/3D%20Structure-1.csv",
+        "3D Structure Part 2": "https://github.com/MeghanaVaddella/Neurodegenerative_Database/blob/main/3D%20Structure-2.csv",
+        "No 3D Structure Data": "https://github.com/MeghanaVaddella/Neurodegenerative_Database/blob/main/No%203D%20Structure.csv"
     }
-
-    for label, url in github_links.items():
-        st.markdown(f"- 🔗 **[{label}]({url})**")
-
-    st.markdown("""
-    📢 **CHANGES IN THE GITHUB WILL BE REFLECTED IN THE APP WHEN THE PAGE IS RELOADED!!**
-    """)
-
+    
+    for label, url in links.items():
+        st.markdown(f"### [{label}]({url})")
+        
+    st.markdown("</div>", unsafe_allow_html=True)
