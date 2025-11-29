@@ -8,7 +8,6 @@ import py3Dmol
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
-import plotly.graph_objects as go
 import tempfile
 
 # --- PAGE CONFIG ---
@@ -55,21 +54,22 @@ st.markdown(f"""
 
     /* Tab Styling */
     .stTabs [data-baseweb="tab-list"] {{
-        gap: 24px;
+        gap: 10px; /* Space between tabs */
         background-color: {HEADER_BG};
         padding: 15px 20px;
         border-radius: 12px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }}
     .stTabs [data-baseweb="tab"] {{
-        height: 60px;
+        height: 65px;
         white-space: pre-wrap;
         background-color: transparent;
         border-radius: 8px;
-        color: #94a3b8; /* Gray-400 */
+        color: #cbd5e1; 
         font-weight: 700;
-        font-size: 1.1rem; /* Text-lg equivalent */
-        padding: 0 20px;
+        font-size: 1.3rem; /* Increased Font Size */
+        padding: 0 25px;
+        margin-right: 15px; /* Extra spacing */
     }}
     .stTabs [aria-selected="true"] {{
         background-color: {BODY_BG};
@@ -91,8 +91,8 @@ st.markdown(f"""
     /* Home Bubble Styling */
     .bubble-card {{
         background-color: white;
-        padding: 3.5rem;
-        border-radius: 20px;
+        padding: 4rem;
+        border-radius: 24px;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         border: 1px solid #f1f5f9;
         margin-bottom: 3rem;
@@ -102,18 +102,10 @@ st.markdown(f"""
         transform: translateY(-4px);
     }}
     
-    /* Headings in Streamlit */
-    h1, h2, h3 {{
+    /* Headings */
+    h1, h2, h3, h4 {{
         font-family: 'Georgia', serif;
         color: #1e3a8a !important;
-    }}
-    
-    /* Text Input Styling */
-    .stTextInput > div > div > input {{
-        background-color: #f8fafc;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        padding: 10px;
     }}
     
     /* Button Styling */
@@ -123,14 +115,30 @@ st.markdown(f"""
         border-radius: 8px;
         font-weight: bold;
         border: none;
-        padding: 0.5rem 1rem;
+        padding: 0.6rem 1.2rem;
         transition: all 0.2s;
+        font-size: 1rem;
     }}
     .stButton > button:hover {{
         background-color: #2c435a;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }}
-
+    
+    /* Helper for Colab Button */
+    .colab-btn {{
+        background-color: white; 
+        color: #3B5875; 
+        border: 2px solid #3B5875; 
+        padding: 10px 20px; 
+        border-radius: 8px; 
+        font-weight: bold; 
+        text-decoration: none; 
+        display: inline-block;
+        margin-top: 10px;
+    }}
+    .colab-btn:hover {{
+        background-color: #f0f9ff;
+    }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -207,7 +215,7 @@ def load_data():
 ppi_df, df_3d, no_structure_df = load_data()
 
 # --- TABS ---
-# Tabs with emojis and labels as requested
+# Tabs with emojis and names beside them
 tabs = st.tabs([
     "🏠 Home", 
     "📄 Data", 
@@ -219,7 +227,6 @@ tabs = st.tabs([
 
 # ================= HOME TAB =================
 with tabs[0]:
-    # Content Logic
     lines = HOME_TEXT_RAW.strip().split('\n')
     
     headers = [
@@ -247,40 +254,33 @@ with tabs[0]:
             # Check for Main Headers
             is_header = any(line.startswith(h) for h in headers)
             if is_header:
-                html_content += f"<h2 style='color:#881337; font-size:42px; border-bottom:3px solid #88133720; padding-bottom:15px; margin-bottom:25px; font-family:Georgia, serif;'>{line}</h2>"
+                html_content += f"<h2 style='color:#881337; font-size:46px; border-bottom:3px solid #88133720; padding-bottom:15px; margin-bottom:25px; font-family:Georgia, serif;'>{line}</h2>"
                 continue
                 
             # Check for Sub Headers (Diseases, PPI Question)
             is_sub = any(line.startswith(s) for s in sub_headers)
             if is_sub:
-                # Specific red keywords logic handled here
-                html_content += f"<div style='color:#991b1b; font-size:32px; font-weight:bold; margin-top:25px; margin-bottom:15px; font-family:Georgia, serif;'>{line}</div>"
+                html_content += f"<div style='color:#991b1b; font-size:36px; font-weight:bold; margin-top:30px; margin-bottom:15px; font-family:Georgia, serif;'>{line}</div>"
                 continue
             
             # Check for Lists
             if line[0].isdigit() and ("." in line[:3]):
-                 html_content += f"<div style='color:#92400e; font-size:28px; font-weight:bold; margin-top:20px; margin-bottom:10px; font-family:Georgia, serif;'>{line}</div>"
+                 html_content += f"<div style='color:#92400e; font-size:30px; font-weight:bold; margin-top:20px; margin-bottom:10px; font-family:Georgia, serif;'>{line}</div>"
                  continue
                  
-            # Regular Text (Black, Large Font)
-            # Handling last paragraph bold/larger
-            p_style = "color:#111827; font-size:24px; line-height:1.7; margin-bottom:15px;"
+            # Regular Text (Black, Larger Font)
+            p_style = "color:#000000; font-size:26px; line-height:1.7; margin-bottom:15px;"
             if is_last_card and "Additionally" in line:
-                p_style = "color:#000000; font-size:26px; line-height:1.7; margin-bottom:15px; font-weight:bold;"
+                p_style = "color:#000000; font-size:28px; line-height:1.7; margin-bottom:15px; font-weight:bold;"
             
             html_content += f"<p style='{p_style}'>{line}</p>"
 
         st.markdown(f"<div class='bubble-card'>{html_content}</div>", unsafe_allow_html=True)
 
     block_buffer = []
-    # Identify last block for styling
-    header_indices = [i for i, line in enumerate(lines) if any(line.strip().startswith(h) for h in headers)]
-    
-    current_idx = 0
     for line in lines:
         if any(line.strip().startswith(h) for h in headers):
             if block_buffer:
-                # Render previous block
                 is_last = "Additionally" in "".join(block_buffer)
                 render_bubble(block_buffer, is_last)
                 block_buffer = []
@@ -297,7 +297,6 @@ with tabs[1]:
         st.markdown("<div class='white-card'>", unsafe_allow_html=True)
         st.header("Protein-Protein Interaction Data")
         
-        # Search functionality
         search_term = st.text_input("Search Data", placeholder="Type to search...", key="ppi_search")
         
         display_df = ppi_df
@@ -310,29 +309,23 @@ with tabs[1]:
         st.markdown("---")
         st.subheader("Visualize Interactions")
         
-        # Interaction Graph Visualizer
+        # Interaction Graph Visualizer (Star Network)
         all_proteins = pd.concat([ppi_df['Protein A'], ppi_df['Protein B']]).unique()
         selected_protein = st.selectbox("Choose Protein", sorted(all_proteins), key="ppi_viz_select")
         
         if st.button("Generate Network Graph", key="gen_graph_btn"):
-            # Star Network Logic
             subset = ppi_df[(ppi_df['Protein A'] == selected_protein) | (ppi_df['Protein B'] == selected_protein)]
             
             if not subset.empty:
                 net = Network(height="600px", width="100%", bgcolor="#ffffff", font_color="black")
-                
-                # Center Node
                 net.add_node(selected_protein, color="#dc2626", size=30, title=f"CENTER: {selected_protein}")
                 
-                # Neighbors
                 for _, row in subset.iterrows():
                     partner = row['Protein B'] if row['Protein A'] == selected_protein else row['Protein A']
                     score = row['Combined Score']
-                    # Add edge and node
                     net.add_node(partner, color="#3b82f6", size=20, title=f"{partner}\nScore: {score}")
                     net.add_edge(selected_protein, partner, value=float(score) if isinstance(score, (int, float)) else 1)
                 
-                # Visualization
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as tmp:
                     net.save_graph(tmp.name)
                     with open(tmp.name, 'r', encoding='utf-8') as f:
@@ -350,8 +343,8 @@ with tabs[1]:
 with tabs[2]:
     with st.container():
         st.markdown("<div class='white-card'>", unsafe_allow_html=True)
-        
         st.header("3D Structure Data")
+        
         search_3d = st.text_input("Search 3D Data", placeholder="Type to search...", key="3d_search")
         
         display_3d = df_3d
@@ -375,17 +368,16 @@ with tabs[3]:
     st.markdown("<div class='white-card'>", unsafe_allow_html=True)
     st.header("3D Protein Structure Visualizer")
     
-    # --- Layout: Controls (Left) | Metadata (Right) ---
+    # --- Layout: Controls (Left) | Info (Right) ---
     top_col1, top_col2 = st.columns([1, 1], gap="large")
     
     with top_col1:
         st.markdown("#### ⚙️ Controls")
         
-        # Protein A
         unique_prot_a = sorted(df_3d['Protein A'].dropna().unique())
         sel_prot_a = st.selectbox("Select Protein A", [""] + unique_prot_a, key="viz_a")
         
-        # Filter Protein B based on A
+        # Linked Search Logic: Filter B based on A
         avail_prot_b = []
         if sel_prot_a:
             avail_prot_b = sorted(df_3d[df_3d['Protein A'] == sel_prot_a]['Protein B'].unique())
@@ -407,38 +399,30 @@ with tabs[3]:
             row_b = df_3d[(df_3d['Protein A'] == sel_prot_a) & (df_3d['Protein B'] == sel_prot_b)].iloc[0]
             st.success(f"**Protein B**: {row_b['Protein B']} | **UniProt**: {row_b['UniProtID B']} | **PDBs**: {row_b['PDB ID B']}")
 
-    # --- Bottom: Viewer ---
-    st.markdown("#### 🔬 Molecular Viewer")
-    viewer_height = 600
+    st.markdown("---")
     
-    # py3Dmol logic
-    view = py3Dmol.view(height=viewer_height, width="100%")
-    view.setBackgroundColor('white')
-    
-    has_model = False
+    # --- Mol* Viewer (Iframe) ---
+    st.markdown("### 🧬 Mol* (MolStar) Viewer")
+    pdb_ids = []
     
     if sel_prot_a:
         row_a = df_3d[df_3d['Protein A'] == sel_prot_a].iloc[0]
-        pdbs_a = [p.strip() for p in str(row_a['PDB ID A']).split(',') if p.strip() != 'NA']
-        if pdbs_a:
-            view.addModel(f"pdb:{pdbs_a[0]}", 'pdb') # Load from RCSB
-            view.setStyle({'model': -1}, {'cartoon': {'color': 'blue'}})
-            has_model = True
-    
+        ids_a = str(row_a['PDB ID A']).split(',')
+        pdb_ids.extend([x.strip() for x in ids_a if x.strip() != 'NA'])
+        
     if sel_prot_b:
         row_b = df_3d[(df_3d['Protein A'] == sel_prot_a) & (df_3d['Protein B'] == sel_prot_b)].iloc[0]
-        pdbs_b = [p.strip() for p in str(row_b['PDB ID B']).split(',') if p.strip() != 'NA']
-        if pdbs_b:
-            view.addModel(f"pdb:{pdbs_b[0]}", 'pdb') # Load from RCSB
-            view.setStyle({'model': -1}, {'cartoon': {'color': 'orange'}})
-            has_model = True
+        ids_b = str(row_b['PDB ID B']).split(',')
+        pdb_ids.extend([x.strip() for x in ids_b if x.strip() != 'NA'])
+        
+    pdb_ids = list(set(pdb_ids)) # Unique IDs
 
-    if has_model:
-        view.zoomTo()
-    
-    # HTML Render
-    html_view = view._make_html()
-    components.html(html_view, height=viewer_height + 20)
+    if pdb_ids:
+        # Construct dynamic Mol* URL
+        molstar_url = "https://molstar.org/viewer/?url=" + ",".join([f"https://files.rcsb.org/download/{pdb}.pdb" for pdb in pdb_ids])
+        st.components.v1.iframe(molstar_url, width=1000, height=600)
+    else:
+        st.warning("No valid PDB IDs found for visualization or no proteins selected.")
 
     st.markdown("---")
     
@@ -459,7 +443,7 @@ with tabs[3]:
     if st.button("Fetch & Download AlphaFold PDBs"):
         if af_uni_a and af_uni_b:
             def get_af_pdb(uid):
-                # Try v4, then v3, v2
+                # Try v4, v3, v2
                 for v in [4, 3, 2, 1]:
                     url = f"https://alphafold.ebi.ac.uk/files/AF-{uid}-F1-model_v{v}.pdb"
                     try:
@@ -516,12 +500,10 @@ with tabs[3]:
                 st.text_area("Generated FASTA", value=combined_fasta, height=200)
                 st.download_button("Download FASTA", combined_fasta, "multimer.fasta", "text/plain")
                 
-                # White button styling for Colab link
+                # Styled Link Button
                 st.markdown("""
-                <a href="https://colab.research.google.com/github/sokrypton/ColabFold/blob/main/AlphaFold2.ipynb" target="_blank" style="text-decoration:none;">
-                    <button style="background-color:white; color:#3B5875; border:1px solid #3B5875; padding:8px 16px; border-radius:8px; font-weight:bold; cursor:pointer;">
-                        Open ColabFold 🔗
-                    </button>
+                <a href="https://colab.research.google.com/github/sokrypton/ColabFold/blob/main/AlphaFold2.ipynb" target="_blank" class="colab-btn">
+                    Open ColabFold 🔗
                 </a>
                 """, unsafe_allow_html=True)
             else:
@@ -529,7 +511,7 @@ with tabs[3]:
 
     st.markdown("---")
 
-    # --- PDB Upload ---
+    # --- PDB Upload (Local Viewer using py3Dmol) ---
     st.subheader("📦 Upload Predicted PDB File")
     uploaded_file = st.file_uploader("Upload PDB", type=['pdb'])
     if uploaded_file:
@@ -549,12 +531,11 @@ with tabs[3]:
 # ================= DATA VISUALIZER TAB =================
 with tabs[4]:
     
-    # 1. Top Section Container
+    # Top Section: Heatmaps (Left) | Network (Right)
     with st.container():
-        # Using columns: 1/3 width for Heatmaps, 2/3 width for Network
         top_left, top_right = st.columns([1, 2], gap="large")
         
-        # --- LEFT COLUMN: HEATMAPS ---
+        # --- LEFT: Heatmaps ---
         with top_left:
             st.markdown("<div class='white-card'>", unsafe_allow_html=True)
             st.markdown("### 🧬 Interactive Matrix")
@@ -564,12 +545,12 @@ with tabs[4]:
             selected_heatmap_prots = st.multiselect("Add Proteins", all_prots, default=default_prots, key="hm_multi")
             
             if selected_heatmap_prots:
-                # Build adjacency matrix
+                # Adjacency Matrix
                 hm_data = pd.DataFrame(index=selected_heatmap_prots, columns=selected_heatmap_prots).fillna(0)
                 for p1 in selected_heatmap_prots:
                     for p2 in selected_heatmap_prots:
                         if p1 == p2:
-                            hm_data.loc[p1, p2] = 1000 # Max score for self
+                            hm_data.loc[p1, p2] = 1000
                         else:
                             match = ppi_df[((ppi_df['Protein A'] == p1) & (ppi_df['Protein B'] == p2)) | 
                                            ((ppi_df['Protein B'] == p1) & (ppi_df['Protein A'] == p2))]
@@ -584,8 +565,7 @@ with tabs[4]:
             st.markdown("---")
             st.markdown("### 🔥 High-Conf. (>0.85)")
             
-            # Filter High Confidence > 0.85
-            # Helper to normalize scores
+            # Helper for High Conf
             def normalize_score(x):
                 try:
                     v = float(x)
@@ -600,7 +580,6 @@ with tabs[4]:
             if hc_prots:
                 sel_hc_prot = st.selectbox("Select Protein", hc_prots, key="hc_sel")
                 
-                # Show neighbors heatmap
                 subset_hc = high_conf_df[(high_conf_df['Protein A'] == sel_hc_prot) | (high_conf_df['Protein B'] == sel_hc_prot)]
                 
                 if not subset_hc.empty:
@@ -623,7 +602,7 @@ with tabs[4]:
                 
             st.markdown("</div>", unsafe_allow_html=True)
 
-        # --- RIGHT COLUMN: DISEASE NETWORK ---
+        # --- RIGHT: Disease Network ---
         with top_right:
             st.markdown("<div class='white-card' style='height: 100%;'>", unsafe_allow_html=True)
             st.markdown("### 🕸️ Disease Interaction Network")
@@ -637,20 +616,19 @@ with tabs[4]:
             sel_disease = st.selectbox("Select Disease", diseases, key="net_dis_sel")
             
             if st.button("Simulate Network", key="sim_net"):
-                # Filter by disease
                 dis_df = ppi_df[ppi_df['Disease Associated'].astype(str).str.contains(sel_disease, regex=False, na=False)]
                 
                 if not dis_df.empty:
-                    # Filter for hubs (Top 30 by degree)
+                    # Filter top hubs to prevent overcrowding
                     G = nx.from_pandas_edgelist(dis_df, 'Protein A', 'Protein B', ['Combined Score'])
                     degrees = dict(G.degree)
                     top_nodes = sorted(degrees, key=degrees.get, reverse=True)[:30]
                     H = G.subgraph(top_nodes)
                     
-                    net_viz = Network(height="550px", width="100%", bgcolor="#ffffff", font_color="black")
+                    net_viz = Network(height="600px", width="100%", bgcolor="#ffffff", font_color="black")
                     net_viz.from_nx(H)
                     
-                    # Custom physics options
+                    # Physics settings for force layout
                     net_viz.set_options("""
                     var options = {
                       "nodes": {
@@ -681,7 +659,7 @@ with tabs[4]:
                         with open(tmp_net.name, 'r', encoding='utf-8') as f:
                             net_html = f.read()
                     
-                    components.html(net_html, height=570)
+                    components.html(net_html, height=620)
                 else:
                     st.warning("No interactions found for this disease.")
             else:
@@ -689,7 +667,7 @@ with tabs[4]:
             
             st.markdown("</div>", unsafe_allow_html=True)
 
-    # 2. Bottom Section: Charts
+    # Bottom Charts
     with st.container():
         chart_c1, chart_c2 = st.columns(2)
         
@@ -745,4 +723,3 @@ with tabs[5]:
         st.markdown(f"### [{label}]({url})")
         
     st.markdown("</div>", unsafe_allow_html=True)
-
