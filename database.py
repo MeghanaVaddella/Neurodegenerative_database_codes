@@ -54,22 +54,22 @@ st.markdown(f"""
 
     /* Tab Styling */
     .stTabs [data-baseweb="tab-list"] {{
-        gap: 10px; /* Space between tabs */
+        gap: 30px; /* Increased space between tabs */
         background-color: {HEADER_BG};
         padding: 15px 20px;
         border-radius: 12px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }}
     .stTabs [data-baseweb="tab"] {{
-        height: 65px;
+        height: 80px;
         white-space: pre-wrap;
         background-color: transparent;
         border-radius: 8px;
         color: #cbd5e1; 
         font-weight: 700;
-        font-size: 1.3rem; /* Increased Font Size */
+        font-size: 2.6rem; /* 2 times original font size (was 1.3rem) */
         padding: 0 25px;
-        margin-right: 15px; /* Extra spacing */
+        margin-right: 15px;
     }}
     .stTabs [aria-selected="true"] {{
         background-color: {BODY_BG};
@@ -78,7 +78,7 @@ st.markdown(f"""
         transform: translateY(-2px);
     }}
 
-    /* Container/Card Styling */
+    /* Container/Card Styling - Kept for Home only if needed */
     .white-card {{
         background-color: white;
         padding: 2rem;
@@ -268,10 +268,11 @@ with tabs[0]:
                  html_content += f"<div style='color:#92400e; font-size:30px; font-weight:bold; margin-top:20px; margin-bottom:10px; font-family:Georgia, serif;'>{line}</div>"
                  continue
                  
-            # Regular Text (Black, Larger Font)
+            # Regular Text
             p_style = "color:#000000; font-size:26px; line-height:1.7; margin-bottom:15px;"
             if is_last_card and "Additionally" in line:
-                p_style = "color:#000000; font-size:28px; line-height:1.7; margin-bottom:15px; font-weight:bold;"
+                # UPDATED: Black, non-bold
+                p_style = "color:#000000; font-size:28px; line-height:1.7; margin-bottom:15px; font-weight:normal;"
             
             html_content += f"<p style='{p_style}'>{line}</p>"
 
@@ -294,7 +295,7 @@ with tabs[0]:
 # ================= DATA TAB =================
 with tabs[1]:
     with st.container():
-        st.markdown("<div class='white-card'>", unsafe_allow_html=True)
+        # REMOVED white-card
         st.header("Protein-Protein Interaction Data")
         
         search_term = st.text_input("Search Data", placeholder="Type to search...", key="ppi_search")
@@ -335,14 +336,12 @@ with tabs[1]:
                 st.download_button("Download Network HTML", html_bytes, f"ppi_network_{selected_protein}.html", "text/html")
             else:
                 st.warning("No interactions found for this protein.")
-        
-        st.markdown("</div>", unsafe_allow_html=True)
 
 
 # ================= 3D STRUCTURE DATA TAB =================
 with tabs[2]:
     with st.container():
-        st.markdown("<div class='white-card'>", unsafe_allow_html=True)
+        # REMOVED white-card
         st.header("3D Structure Data")
         
         search_3d = st.text_input("Search 3D Data", placeholder="Type to search...", key="3d_search")
@@ -359,13 +358,11 @@ with tabs[2]:
         st.subheader("Proteins Without 3D Structure")
         st.dataframe(no_structure_df, use_container_width=True, hide_index=True)
         st.download_button("Download No 3D Structure Data", no_structure_df.to_csv(index=False), "No_3D_structure_data.csv", "text/csv")
-        
-        st.markdown("</div>", unsafe_allow_html=True)
 
 
 # ================= 3D VISUALIZER TAB =================
 with tabs[3]:
-    st.markdown("<div class='white-card'>", unsafe_allow_html=True)
+    # REMOVED white-card
     st.header("3D Protein Structure Visualizer")
     
     # --- Layout: Controls (Left) | Info (Right) ---
@@ -456,6 +453,7 @@ with tabs[3]:
                 pdb_a_txt = get_af_pdb(af_uni_a)
                 pdb_b_txt = get_af_pdb(af_uni_b)
                 
+                # UPDATED Logic: Download whatever is found, suppress "Could not find" error
                 if pdb_a_txt and pdb_b_txt:
                     combined = f"REMARK Protein A: {af_uni_a}\n{pdb_a_txt}\nTER\nREMARK Protein B: {af_uni_b}\n{pdb_b_txt}\nEND"
                     st.download_button(
@@ -465,8 +463,13 @@ with tabs[3]:
                         mime="chemical/x-pdb"
                     )
                     st.success("Ready for download!")
+                elif pdb_a_txt:
+                    st.download_button(label=f"Download {af_uni_a}", data=pdb_a_txt, file_name=f"AF_{af_uni_a}.pdb", mime="chemical/x-pdb")
+                elif pdb_b_txt:
+                    st.download_button(label=f"Download {af_uni_b}", data=pdb_b_txt, file_name=f"AF_{af_uni_b}.pdb", mime="chemical/x-pdb")
                 else:
-                    st.error("Could not find AlphaFold entries for one or both proteins.")
+                    # Do nothing / suppress error as requested
+                    pass
         else:
             st.warning("Select both UniProt IDs first.")
             
@@ -518,14 +521,17 @@ with tabs[3]:
         pdb_content = uploaded_file.read().decode("utf-8")
         st.text_area("File Content Preview", pdb_content, height=150)
         
+        # Add Download Option for the uploaded file (or visualize content)
+        st.download_button("Download Uploaded Structure", pdb_content, "uploaded_structure.pdb", "chemical/x-pdb")
+        
         view_up = py3Dmol.view(width=800, height=500)
         view_up.addModel(pdb_content, "pdb")
+        # Ensure rainbow (spectrum)
         view_up.setStyle({'cartoon': {'color': 'spectrum'}})
         view_up.zoomTo()
         view_up.setBackgroundColor('white')
         components.html(view_up._make_html(), height=500)
         
-    st.markdown("</div>", unsafe_allow_html=True)
 
 
 # ================= DATA VISUALIZER TAB =================
@@ -537,7 +543,7 @@ with tabs[4]:
         
         # --- LEFT: Heatmaps ---
         with top_left:
-            st.markdown("<div class='white-card'>", unsafe_allow_html=True)
+            # REMOVED white-card
             st.markdown("### 🧬 Interactive Matrix")
             
             all_prots = sorted(pd.concat([ppi_df['Protein A'], ppi_df['Protein B']]).unique())
@@ -600,11 +606,10 @@ with tabs[4]:
             else:
                 st.write("No high confidence data available.")
                 
-            st.markdown("</div>", unsafe_allow_html=True)
 
         # --- RIGHT: Disease Network ---
         with top_right:
-            st.markdown("<div class='white-card' style='height: 100%;'>", unsafe_allow_html=True)
+            # REMOVED white-card
             st.markdown("### 🕸️ Disease Interaction Network")
             
             diseases = [
@@ -665,50 +670,45 @@ with tabs[4]:
             else:
                 st.info("Select a disease and click 'Simulate Network' to generate the graph.")
             
-            st.markdown("</div>", unsafe_allow_html=True)
 
     # Bottom Charts
     with st.container():
         chart_c1, chart_c2 = st.columns(2)
         
         with chart_c1:
-            st.markdown("<div class='white-card'>", unsafe_allow_html=True)
+            # REMOVED white-card
             st.markdown("#### Distribution by Disease")
             if 'Disease Associated' in ppi_df.columns:
                 dis_counts = ppi_df['Disease Associated'].value_counts().reset_index()
                 dis_counts.columns = ['Disease', 'Count']
                 fig_pie = px.pie(dis_counts, names='Disease', values='Count', color_discrete_sequence=px.colors.qualitative.Pastel)
                 st.plotly_chart(fig_pie, use_container_width=True)
-            st.markdown("</div>", unsafe_allow_html=True)
             
-            st.markdown("<div class='white-card'>", unsafe_allow_html=True)
+            # REMOVED white-card
             st.markdown("#### Top 15 Interacting Proteins")
             protein_counts = pd.concat([ppi_df['Protein A'], ppi_df['Protein B']]).value_counts().head(15).reset_index()
             protein_counts.columns = ['Protein', 'Count']
             fig_top = px.bar(protein_counts, x='Protein', y='Count', color='Count')
             st.plotly_chart(fig_top, use_container_width=True)
-            st.markdown("</div>", unsafe_allow_html=True)
             
         with chart_c2:
-            st.markdown("<div class='white-card'>", unsafe_allow_html=True)
+            # REMOVED white-card
             st.markdown("#### Experimental Systems")
             if 'Experimental System' in ppi_df.columns:
                 exp_counts = ppi_df['Experimental System'].value_counts().reset_index()
                 exp_counts.columns = ['System', 'Count']
                 fig_bar = px.bar(exp_counts, x='Count', y='System', orientation='h', color='Count', color_continuous_scale='Blues')
                 st.plotly_chart(fig_bar, use_container_width=True)
-            st.markdown("</div>", unsafe_allow_html=True)
 
-            st.markdown("<div class='white-card'>", unsafe_allow_html=True)
+            # REMOVED white-card
             st.markdown("#### Confidence Score Distribution")
             fig_hist = px.histogram(ppi_df, x='norm_score', nbins=20, title="Score Distribution", color_discrete_sequence=['#8884d8'])
             st.plotly_chart(fig_hist, use_container_width=True)
-            st.markdown("</div>", unsafe_allow_html=True)
 
 
 # ================= GITHUB EDIT TAB =================
 with tabs[5]:
-    st.markdown("<div class='white-card' style='text-align:center; padding: 50px;'>", unsafe_allow_html=True)
+    # REMOVED white-card
     st.header("🛠️ GitHub Repository")
     st.write("Access and edit the datasets directly on GitHub. Changes made to the CSV files in the repository will be automatically reflected here upon reloading the application.")
     
@@ -721,5 +721,3 @@ with tabs[5]:
     
     for label, url in links.items():
         st.markdown(f"### [{label}]({url})")
-        
-    st.markdown("</div>", unsafe_allow_html=True)
