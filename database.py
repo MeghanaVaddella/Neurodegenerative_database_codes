@@ -67,7 +67,7 @@ st.markdown(f"""
         border-radius: 8px;
         color: #cbd5e1; 
         font-weight: 700;
-        font-size: 2.6rem; /* 2 times original font size (was 1.3rem) */
+        font-size: 1.3rem;  2 times original font size (was 1.3rem) */
         padding: 0 25px;
         margin-right: 15px;
     }}
@@ -721,3 +721,4 @@ with tabs[5]:
     
     for label, url in links.items():
         st.markdown(f"### [{label}]({url})")
+
