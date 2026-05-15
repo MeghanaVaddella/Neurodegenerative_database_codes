@@ -61,13 +61,13 @@ st.markdown(f"""
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }}
     .stTabs [data-baseweb="tab"] {{
-        height: 80px;
+        height: 50px;
         white-space: pre-wrap;
         background-color: transparent;
         border-radius: 8px;
         color: #cbd5e1; 
         font-weight: 700;
-        font-size: 1.3rem;  2 times original font size (was 1.3rem) */
+        font-size: 2.5rem;
         padding: 0 25px;
         margin-right: 15px;
     }}
@@ -117,7 +117,7 @@ st.markdown(f"""
         border: none;
         padding: 0.6rem 1.2rem;
         transition: all 0.2s;
-        font-size: 5rem;
+        font-size: 1rem;
     }}
     .stButton > button:hover {{
         background-color: #2c435a;
