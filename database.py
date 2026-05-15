@@ -117,7 +117,7 @@ st.markdown(f"""
         border: none;
         padding: 0.6rem 1.2rem;
         transition: all 0.2s;
-        font-size: 1rem;
+        font-size: 5rem;
     }}
     .stButton > button:hover {{
         background-color: #2c435a;
