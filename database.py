@@ -42,7 +42,7 @@ st.markdown(f"""
         text-align: center;
         color: #e2e8f0;
         font-family: 'Georgia', serif;
-        font-size: 4rem;
+        font-size: 5rem;
         font-weight: bold;
         letter-spacing: 0.1em;
         text-transform: uppercase;
@@ -61,13 +61,13 @@ st.markdown(f"""
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }}
     .stTabs [data-baseweb="tab"] {{
-        height: 50px;
+        height: 100px;
         white-space: pre-wrap;
         background-color: transparent;
         border-radius: 8px;
         color: #cbd5e1; 
         font-weight: 700;
-        font-size: 5rem;
+        font-size: 5rem !important;
         padding: 0 25px;
         margin-right: 15px;
     }}
