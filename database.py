@@ -380,15 +380,45 @@ with tabs[3]:
         )
     
     with top_col2:
-        st.markdown("#### ℹ Interaction Info")
-        if sel_prot_a:
-            row_a = df_3d[df_3d['Protein A'] == sel_prot_a].iloc[0]
-            st.info(f"*Protein A: {row_a['Protein A']} | **UniProt: {row_a['UniProtID A']} | **PDBs*: {row_a['PDB ID A']}")
-            
-        if sel_prot_b:
-            row_b = df_3d[(df_3d['Protein A'] == sel_prot_a) & (df_3d['Protein B'] == sel_prot_b)].iloc[0]
-            st.success(f"*Protein B: {row_b['Protein B']} | **UniProt: {row_b['UniProtID B']} | **PDBs*: {row_b['PDB ID B']}")
+    st.markdown("#### ℹ Interaction Info")
 
+    if sel_prot_a:
+        row_a = df_3d[df_3d['Protein A'] == sel_prot_a].iloc[0]
+
+        st.markdown(f"""
+        <div style="
+            background-color:white;
+            color:#001C3D;
+            padding:15px;
+            border-radius:10px;
+            border:1px solid #d1d5db;
+            margin-bottom:10px;
+            box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+            <b>Protein A:</b> {row_a['Protein A']}<br>
+            <b>UniProt:</b> {row_a['UniProtID A']}<br>
+            <b>PDB IDs:</b> {row_a['PDB ID A']}
+        </div>
+        """, unsafe_allow_html=True)
+
+    if sel_prot_b:
+        row_b = df_3d[
+            (df_3d['Protein A'] == sel_prot_a) &
+            (df_3d['Protein B'] == sel_prot_b)
+        ].iloc[0]
+
+        st.markdown(f"""
+        <div style="
+            background-color:white;
+            color:#001C3D;
+            padding:15px;
+            border-radius:10px;
+            border:1px solid #d1d5db;
+            box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+            <b>Protein B:</b> {row_b['Protein B']}<br>
+            <b>UniProt:</b> {row_b['UniProtID B']}<br>
+            <b>PDB IDs:</b> {row_b['PDB ID B']}
+        </div>
+        """, unsafe_allow_html=True)
     st.markdown("---")
     
     # --- Mol* Viewer (Iframe) ---
