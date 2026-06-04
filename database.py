@@ -60,16 +60,22 @@ st.markdown(f"""
         border-radius: 12px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }}
-    .stTabs [data-baseweb="tab"] {{
-        height: 100px;
-        white-space: pre-wrap;
-        background-color: transparent;
-        border-radius: 8px;
-        color: #cbd5e1; 
-        font-weight: 700;
-        font-size: 5rem !important;
-        padding: 0 25px;
-        margin-right: 15px;
+    .stTabs [data-baseweb="tab"] {
+    height: 100px;
+    white-space: pre-wrap;
+    background-color: transparent;
+    border-radius: 8px;
+    color: #cbd5e1;
+    padding: 0 25px;
+    margin-right: 15px;
+}
+
+    .stTabs [data-baseweb="tab"] p,
+    .stTabs [data-baseweb="tab"] span,
+    .stTabs [data-baseweb="tab"] div {
+    font-size: 40px !important;
+    font-weight: 700 !important;
+}
     }}
     .stTabs [aria-selected="true"] {{
         background-color: {BODY_BG};
