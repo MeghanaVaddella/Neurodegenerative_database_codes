@@ -73,8 +73,6 @@ st.markdown(f"""
 
 </style>
 """, unsafe_allow_html=True)
-}
-    }}
 
     /* Container/Card Styling - Kept for Home only if needed */
     .white-card {{
