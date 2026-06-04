@@ -443,58 +443,6 @@ with tabs[3]:
 
     st.markdown("---")
     
-    # --- AlphaFold Download ---
-    st.subheader("💾 Download AlphaFold Predicted Structures")
-    
-    af_col1, af_col2 = st.columns(2)
-    with af_col1:
-        uniprot_opts_a = sorted(df_3d['UniProtID A'].dropna().unique())
-        af_uni_a = st.selectbox("Select UniProt ID A (AF)", [""] + uniprot_opts_a, key="af_a")
-    
-    with af_col2:
-        af_uni_b_opts = []
-        if af_uni_a:
-            af_uni_b_opts = sorted(df_3d[df_3d['UniProtID A'] == af_uni_a]['UniProtID B'].unique())
-        af_uni_b = st.selectbox("Select UniProt ID B (AF)", [""] + af_uni_b_opts, key="af_b", disabled=not af_uni_a)
-        
-    if st.button("Fetch & Download AlphaFold PDBs"):
-        if af_uni_a and af_uni_b:
-            def get_af_pdb(uid):
-                # Try v4, v3, v2
-                for v in [4, 3, 2, 1]:
-                    url = f"https://alphafold.ebi.ac.uk/files/AF-{uid}-F1-model_v{v}.pdb"
-                    try:
-                        r = requests.get(url, timeout=10)
-                        if r.status_code == 200: return r.text
-                    except: pass
-                return None
-            
-            with st.spinner("Fetching AlphaFold structures..."):
-                pdb_a_txt = get_af_pdb(af_uni_a)
-                pdb_b_txt = get_af_pdb(af_uni_b)
-                
-                # UPDATED Logic: Download whatever is found, suppress "Could not find" error
-                if pdb_a_txt and pdb_b_txt:
-                    combined = f"REMARK Protein A: {af_uni_a}\n{pdb_a_txt}\nTER\nREMARK Protein B: {af_uni_b}\n{pdb_b_txt}\nEND"
-                    st.download_button(
-                        label="Download Combined PDB",
-                        data=combined,
-                        file_name=f"AF_{af_uni_a}_{af_uni_b}.pdb",
-                        mime="chemical/x-pdb"
-                    )
-                    st.success("Ready for download!")
-                elif pdb_a_txt:
-                    st.download_button(label=f"Download {af_uni_a}", data=pdb_a_txt, file_name=f"AF_{af_uni_a}.pdb", mime="chemical/x-pdb")
-                elif pdb_b_txt:
-                    st.download_button(label=f"Download {af_uni_b}", data=pdb_b_txt, file_name=f"AF_{af_uni_b}.pdb", mime="chemical/x-pdb")
-                else:
-                    # Do nothing / suppress error as requested
-                    pass
-        else:
-            st.warning("Select both UniProt IDs first.")
-            
-    st.markdown("---")
-
     # --- FASTA Generator ---
     st.subheader("🧬 Predict Interactions using AlphaFold-Multimer")
     
