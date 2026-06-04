@@ -354,7 +354,9 @@ with tabs[2]:
 with tabs[3]:
     # REMOVED white-card
     st.header("3D Protein Structure Visualizer")
-    
+    uniprot_opts_a = sorted(
+        df_3d['UniProtID A'].dropna().unique()
+    )
     # --- Layout: Controls (Left) | Info (Right) ---
     top_col1, top_col2 = st.columns([1, 1], gap="large")
     
