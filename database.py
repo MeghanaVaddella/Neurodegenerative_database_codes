@@ -101,21 +101,22 @@ st.markdown(f"""
         color: #1e3a8a !important;
     }}
     
-    /* Button Styling */
-    .stButton > button {{
-        background-color: #3B5875;
-        color: white;
-        border-radius: 8px;
-        font-weight: bold;
-        border: none;
-        padding: 0.6rem 1.2rem;
-        transition: all 0.2s;
-        font-size: 1rem;
-    }}
-    .stButton > button:hover {{
-        background-color: #2c435a;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }}
+    /* All Buttons */
+.stButton > button,
+.stDownloadButton > button {
+    background-color: #3B5875 !important;
+    color: white !important;
+    border-radius: 8px !important;
+    font-weight: bold !important;
+    border: none !important;
+    padding: 0.6rem 1.2rem !important;
+}
+
+.stButton > button:hover,
+.stDownloadButton > button:hover {
+    background-color: #2c435a !important;
+    color: white !important;
+}
     
     /* Helper for Colab Button */
     .colab-btn {{
