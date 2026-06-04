@@ -103,14 +103,14 @@ st.markdown(f"""
     
     /* All Buttons */
 .stButton > button,
-.stDownloadButton > button {
+.stDownloadButton > button {{
     background-color: #3B5875 !important;
     color: white !important;
     border-radius: 8px !important;
     font-weight: bold !important;
     border: none !important;
     padding: 0.6rem 1.2rem !important;
-}
+}}
 
 .stButton > button:hover,
 .stDownloadButton > button:hover {
