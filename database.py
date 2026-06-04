@@ -62,7 +62,7 @@ st.markdown(f"""
 .stTabs [data-baseweb="tab"] p,
 .stTabs [data-baseweb="tab"] span,
 .stTabs [data-baseweb="tab"] div {{
-    font-size: 32px !important;
+    font-size: 28px !important;
     font-weight: 700 !important;
 }}
 
