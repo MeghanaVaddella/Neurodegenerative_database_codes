@@ -25,63 +25,55 @@ TEXT_COLOR = "#001C3D"
 
 # --- CUSTOM CSS ---
 st.markdown(f"""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap');
+<style>
 
-    /* Global Styles */
-    .stApp {{
-        background-color: {BODY_BG};
-        color: {TEXT_COLOR};
-        font-family: 'Inter', sans-serif;
-    }}
-    
-    /* Header Styling */
-    .main-header {{
-        background-color: {HEADER_BG};
-        padding: 3rem;
-        text-align: center;
-        color: #e2e8f0;
-        font-family: 'Georgia', serif;
-        font-size: 5rem;
-        font-weight: bold;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        margin-bottom: 2rem;
-        border-radius: 12px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Georgia:wght@400;700&display=swap');
 
-    /* Tab Styling */
-    .stTabs [data-baseweb="tab-list"] {{
-        gap: 30px; /* Increased space between tabs */
-        background-color: {HEADER_BG};
-        padding: 15px 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }}
-    .stTabs [data-baseweb="tab"] {
+/* Global Styles */
+.stApp {{
+    background-color: {BODY_BG};
+    color: {TEXT_COLOR};
+    font-family: 'Inter', sans-serif;
+}}
+
+/* Header Styling */
+.main-header {{
+    background-color: {HEADER_BG};
+    padding: 3rem;
+    text-align: center;
+    color: #e2e8f0;
+    font-family: 'Georgia', serif;
+    font-size: 5rem;
+    font-weight: bold;
+}}
+
+/* Tab Styling */
+.stTabs [data-baseweb="tab-list"] {{
+    gap: 30px;
+    background-color: {HEADER_BG};
+    padding: 15px 20px;
+    border-radius: 12px;
+}}
+
+.stTabs [data-baseweb="tab"] {{
     height: 100px;
-    white-space: pre-wrap;
-    background-color: transparent;
-    border-radius: 8px;
-    color: #cbd5e1;
-    padding: 0 25px;
-    margin-right: 15px;
-}
+}}
 
-    .stTabs [data-baseweb="tab"] p,
-    .stTabs [data-baseweb="tab"] span,
-    .stTabs [data-baseweb="tab"] div {
-    font-size: 40px !important;
+.stTabs [data-baseweb="tab"] p,
+.stTabs [data-baseweb="tab"] span,
+.stTabs [data-baseweb="tab"] div {{
+    font-size: 32px !important;
     font-weight: 700 !important;
+}}
+
+.stTabs [aria-selected="true"] {{
+    background-color: {BODY_BG};
+    color: {TEXT_COLOR};
+}}
+
+</style>
+""", unsafe_allow_html=True)
 }
-    }}
-    .stTabs [aria-selected="true"] {{
-        background-color: {BODY_BG};
-        color: {TEXT_COLOR};
-        border-bottom: 4px solid {TEXT_COLOR};
-        transform: translateY(-2px);
     }}
 
     /* Container/Card Styling - Kept for Home only if needed */
@@ -145,8 +137,6 @@ st.markdown(f"""
     .colab-btn:hover {{
         background-color: #f0f9ff;
     }}
-    </style>
-""", unsafe_allow_html=True)
 
 # --- HEADER ---
 st.markdown('<div class="main-header">NEUROGEN PPI</div>', unsafe_allow_html=True)
