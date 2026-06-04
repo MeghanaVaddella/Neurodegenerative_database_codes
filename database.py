@@ -578,67 +578,101 @@ with tabs[4]:
                 
 
         # --- RIGHT: Disease Network ---
-        with top_right:
-            # REMOVED white-card
-            st.markdown("### 🕸 Disease Interaction Network")
-            
-            diseases = [
-                "Alzheimer's Disease", "Parkinson's Disease", 
-                "Amyotrophic Lateral Sclerosis (ALS)", "Multiple Sclerosis (MS)", 
-                "Friedreich’s Ataxia (FA)"
-            ]
-            
-            sel_disease = st.selectbox("Select Disease", diseases, key="net_dis_sel")
-            
-            if st.button("Simulate Network", key="sim_net"):
-                dis_df = ppi_df[ppi_df['Disease Associated'].astype(str).str.contains(sel_disease, regex=False, na=False)]
-                
-                if not dis_df.empty:
-                    # Filter top hubs to prevent overcrowding
-                    G = nx.from_pandas_edgelist(dis_df, 'Protein A', 'Protein B', ['Combined Score'])
-                    degrees = dict(G.degree)
-                    top_nodes = sorted(degrees, key=degrees.get, reverse=True)[:30]
-                    H = G.subgraph(top_nodes)
-                    
-                    net_viz = Network(height="600px", width="100%", bgcolor="#ffffff", font_color="black")
-                    net_viz.from_nx(H)
-                    
-                    # Physics settings for force layout
-                    net_viz.set_options("""
-                    var options = {
-                      "nodes": {
-                        "color": {
-                          "background": "#3b82f6",
-                          "border": "white"
-                        },
-                        "font": {
-                          "size": 16,
-                          "face": "tahoma"
-                        }
-                      },
-                      "physics": {
-                        "forceAtlas2Based": {
-                          "gravitationalConstant": -50,
-                          "centralGravity": 0.01,
-                          "springLength": 100,
-                          "springConstant": 0.08
-                        },
-                        "minVelocity": 0.75,
-                        "solver": "forceAtlas2Based"
-                      }
-                    }
-                    """)
-                    
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as tmp_net:
-                        net_viz.save_graph(tmp_net.name)
-                        with open(tmp_net.name, 'r', encoding='utf-8') as f:
-                            net_html = f.read()
-                    
-                    components.html(net_html, height=620)
-                else:
-                    st.warning("No interactions found for this disease.")
-            else:
-                st.info("Select a disease and click 'Simulate Network' to generate the graph.")
+        # --- RIGHT: High Confidence Binding Hubs ---
+with top_right:
+
+    st.markdown("### 🔥 High Confidence Binding Hubs")
+
+    def normalize_score(x):
+        try:
+            v = float(x)
+            return v * 1000 if v <= 1 else v
+        except:
+            return 0
+
+    ppi_df['norm_score'] = ppi_df['Combined Score'].apply(normalize_score)
+
+    high_conf_df = ppi_df[ppi_df['norm_score'] >= 850]
+
+    if not high_conf_df.empty:
+
+        hub_counts = pd.concat([
+            high_conf_df['Protein A'],
+            high_conf_df['Protein B']
+        ]).value_counts()
+
+        hub_proteins = sorted(hub_counts.index.tolist())
+
+        selected_hub = st.selectbox(
+            "Select Hub Protein",
+            hub_proteins,
+            key="hub_network_select"
+        )
+
+        hub_subset = high_conf_df[
+            (high_conf_df['Protein A'] == selected_hub) |
+            (high_conf_df['Protein B'] == selected_hub)
+        ]
+
+        if not hub_subset.empty:
+
+            net = Network(
+                height="650px",
+                width="100%",
+                bgcolor="#ffffff",
+                font_color="black"
+            )
+
+            net.add_node(
+                selected_hub,
+                color="#dc2626",
+                size=35,
+                title=f"Hub Protein: {selected_hub}"
+            )
+
+            for _, row in hub_subset.iterrows():
+
+                partner = (
+                    row['Protein B']
+                    if row['Protein A'] == selected_hub
+                    else row['Protein A']
+                )
+
+                score = row['norm_score']
+
+                edge_color = "#C4A484" if score >= 850 else "#d3d3d3"
+
+                net.add_node(
+                    partner,
+                    color="#3b82f6",
+                    size=20,
+                    title=f"{partner}\nScore: {score}"
+                )
+
+                net.add_edge(
+                    selected_hub,
+                    partner,
+                    color=edge_color,
+                    width=4 if score >= 850 else 1
+                )
+
+            with tempfile.NamedTemporaryFile(
+                delete=False,
+                suffix=".html"
+            ) as tmp:
+
+                net.save_graph(tmp.name)
+
+                with open(tmp.name, "r", encoding="utf-8") as f:
+                    html = f.read()
+
+            components.html(html, height=680)
+
+        else:
+            st.warning("No high-confidence interactions found.")
+
+    else:
+        st.warning("No interactions with score > 0.85 found.")
             
 
     # Bottom Charts
