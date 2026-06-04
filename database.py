@@ -71,9 +71,6 @@ st.markdown(f"""
     color: {TEXT_COLOR};
 }}
 
-</style>
-""", unsafe_allow_html=True)
-
     /* Container/Card Styling - Kept for Home only if needed */
     .white-card {{
         background-color: white;
@@ -135,6 +132,8 @@ st.markdown(f"""
     .colab-btn:hover {{
         background-color: #f0f9ff;
     }}
+    </style>
+""", unsafe_allow_html=True)
 
 # --- HEADER ---
 st.markdown('<div class="main-header">NEUROGEN PPI</div>', unsafe_allow_html=True)
